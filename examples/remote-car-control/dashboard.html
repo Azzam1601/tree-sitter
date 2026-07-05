@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOR – التحكم بالسيارة عن بعد</title>
+<style>
+  :root {
+    --mor-green: #1a6b2f;
+    --mor-gold:  #c9a227;
+    --bg:        #0f1117;
+    --surface:   #1c1f2b;
+    --border:    #2d3245;
+    --text:      #e8eaf6;
+    --muted:     #8892b0;
+    --ok:        #4caf50;
+    --err:       #f44336;
+    --warn:      #ff9800;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ─────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--mor-green) 0%, #0d3d1a 100%);
+    border-bottom: 3px solid var(--mor-gold);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .logo {
+    width: 56px; height: 56px;
+    background: var(--mor-gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 900; color: var(--mor-green);
+    flex-shrink: 0;
+  }
+  .brand h1 { font-size: 1.25rem; color: #fff; line-height: 1.2; }
+  .brand p  { font-size: 0.78rem; color: #b8f5c8; margin-top: 2px; }
+  .contact {
+    margin-inline-start: auto;
+    text-align: start;
+    font-size: 0.75rem;
+    color: #b8f5c8;
+    line-height: 1.7;
+  }
+  .contact a { color: var(--mor-gold); text-decoration: none; }
+
+  /* ── Layout ─────────────────────────────────────── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  /* ── Cards ──────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .card h2 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── Canvas area ────────────────────────────────── */
+  #map-wrap {
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #map-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  #track {
+    flex: 1;
+    border-radius: 8px;
+    background: #111827;
+    border: 1px solid var(--border);
+    width: 100%;
+    min-height: 320px;
+    cursor: crosshair;
+  }
+
+  /* ── State ──────────────────────────────────────── */
+  .state-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat {
+    background: #11141e;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .stat .label { font-size: 0.68rem; color: var(--muted); margin-bottom: 4px; }
+  .stat .value { font-size: 1.3rem; font-weight: 700; color: #fff; }
+  .stat .value.ok  { color: var(--ok); }
+  .stat .value.err { color: var(--err); }
+  .stat .value.warn{ color: var(--warn); }
+
+  /* ── Connection banner ──────────────────────────── */
+  #conn-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    background: #11141e;
+    border: 1px solid var(--border);
+  }
+  #conn-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--err);
+    transition: background .3s;
+  }
+  #conn-dot.connected { background: var(--ok); }
+
+  /* ── Command log ────────────────────────────────── */
+  #log-box {
+    height: 200px;
+    overflow-y: auto;
+    background: #0a0c14;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    font-family: 'Consolas', monospace;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .log-entry { padding: 2px 0; border-bottom: 1px solid #1a1d29; }
+  .log-entry.ok  { color: #80cfa9; }
+  .log-entry.err { color: #f48fb1; }
+  .log-entry.evt { color: #80b8f0; }
+
+  /* ── Command input ──────────────────────────────── */
+  #cmd-wrap {
+    display: flex; gap: 8px;
+  }
+  #cmd-input {
+    flex: 1;
+    background: #11141e;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: #fff;
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    outline: none;
+    direction: ltr;
+  }
+  #cmd-input:focus { border-color: var(--mor-gold); }
+  #cmd-btn {
+    background: var(--mor-green);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    padding: 9px 18px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  #cmd-btn:hover { background: #24903f; }
+
+  /* ── Quick buttons ──────────────────────────────── */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .qbtn {
+    background: #11141e;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background .15s, border-color .15s;
+  }
+  .qbtn:hover { background: #1e2235; border-color: var(--mor-gold); }
+  .qbtn.danger { border-color: #5a1515; }
+  .qbtn.danger:hover { background: #3a0f0f; border-color: var(--err); }
+  .qbtn.green { border-color: #1a4d24; }
+  .qbtn.green:hover { background: #0f3318; border-color: var(--ok); }
+
+  /* ── Server input ───────────────────────────────── */
+  #server-wrap { display: flex; gap: 8px; }
+  #server-input {
+    flex: 1;
+    background: #11141e;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: #fff;
+    padding: 7px 10px;
+    font-size: 0.8rem;
+    outline: none;
+  }
+  #server-input:focus { border-color: var(--mor-gold); }
+  #conn-btn {
+    background: #1a3a5c;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  #conn-btn:hover { background: #234d7a; }
+
+  footer {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--muted);
+    padding: 10px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">M</div>
+  <div class="brand">
+    <h1>شركة مور للخدمات | MOR Services</h1>
+    <p>لوحة التحكم بالسيارة عن بعد — Remote Car Control Dashboard</p>
+  </div>
+  <div class="contact">
+    <div>📞 <a href="tel:920013104">920013104</a></div>
+    <div>✉️ <a href="mailto:info@mor.sa">info@mor.sa</a></div>
+    <div>القصيم — المملكة العربية السعودية</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Left: map + log + command input -->
+  <div id="map-wrap">
+    <div class="card" id="map-card">
+      <h2>موقع السيارة — Car Position</h2>
+      <canvas id="track"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>سجل الأوامر — Command Log</h2>
+      <div id="log-box"></div>
+    </div>
+
+    <div class="card">
+      <h2>أدخل أمرًا — Enter Command</h2>
+      <div id="cmd-wrap">
+        <input id="cmd-input" type="text" placeholder="e.g.  move forward 50  /  تقدم 50" autocomplete="off" />
+        <button id="cmd-btn">إرسال / Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: connection + state + quick buttons -->
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+    <div class="card">
+      <h2>الاتصال — Connection</h2>
+      <div id="server-wrap">
+        <input id="server-input" value="ws://localhost:8765" />
+        <button id="conn-btn">Connect</button>
+      </div>
+      <div id="conn-bar" style="margin-top:8px;">
+        <div id="conn-dot"></div>
+        <span id="conn-label">Disconnected</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>حالة السيارة — Car State</h2>
+      <div class="state-grid">
+        <div class="stat">
+          <div class="label">X</div>
+          <div class="value" id="s-x">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Y</div>
+          <div class="value" id="s-y">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">الاتجاه / Heading</div>
+          <div class="value" id="s-heading">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">السرعة / Speed</div>
+          <div class="value" id="s-speed">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">الأضواء / Lights</div>
+          <div class="value" id="s-lights">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">الحالة / Status</div>
+          <div class="value" id="s-running">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>أوامر سريعة — Quick Controls</h2>
+      <div class="quick-grid">
+        <button class="qbtn green" onclick="send('start')">▶ تشغيل<br>Start</button>
+        <button class="qbtn" onclick="send('move forward 50')">↑ أمام<br>Fwd 50</button>
+        <button class="qbtn danger" onclick="send('stop')">■ توقف<br>Stop</button>
+
+        <button class="qbtn" onclick="send('turn left 45')">↺ يسار<br>Left 45°</button>
+        <button class="qbtn" onclick="send('status')">ℹ حالة<br>Status</button>
+        <button class="qbtn" onclick="send('turn right 45')">↻ يمين<br>Right 45°</button>
+
+        <button class="qbtn" onclick="send('move backward 50')">↓ خلف<br>Back 50</button>
+        <button class="qbtn" onclick="send('brake')">⚡ فرامل<br>Brake</button>
+        <button class="qbtn" onclick="send('reset')">↺ إعادة<br>Reset</button>
+
+        <button class="qbtn" onclick="send('lights on')">💡 أضواء<br>On</button>
+        <button class="qbtn" onclick="send('set speed 50')">⚙ سرعة<br>50</button>
+        <button class="qbtn" onclick="send('lights off')">🌑 إطفاء<br>Lights Off</button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  MOR Services Company | شركة مور للخدمات · Al-Qassim · Saudi Arabia · 📞 920013104 · info@mor.sa
+</footer>
+
+<script>
+  // ── Canvas / track drawing ─────────────────────────
+  const canvas = document.getElementById('track');
+  const ctx = canvas.getContext('2d');
+
+  let trail = [];       // [{x, y}]
+  let carState = null;
+
+  function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width  - 32;
+    canvas.height = Math.max(rect.height - 60, 280);
+    drawTrack();
+  }
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 50);
+
+  function worldToCanvas(wx, wy, scale, ox, oy) {
+    return [ox + wx * scale, oy - wy * scale];
+  }
+
+  function drawTrack() {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid
+    ctx.strokeStyle = '#1c2438';
+    ctx.lineWidth = 1;
+    const step = 40;
+    for (let x = 0; x < W; x += step) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for (let y = 0; y < H; y += step) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+    if (!carState) return;
+
+    // Auto-scale
+    const allX = trail.map(p => p.x).concat([carState.x, 0]);
+    const allY = trail.map(p => p.y).concat([carState.y, 0]);
+    const minX = Math.min(...allX), maxX = Math.max(...allX);
+    const minY = Math.min(...allY), maxY = Math.max(...allY);
+    const spanX = Math.max(maxX - minX, 50), spanY = Math.max(maxY - minY, 50);
+    const scale = Math.min((W - 60) / spanX, (H - 60) / spanY, 4);
+    const cx = ((minX + maxX) / 2), cy = ((minY + maxY) / 2);
+    const ox = W / 2 - cx * scale, oy = H / 2 + cy * scale;
+
+    // Origin cross
+    const [ox2, oy2] = worldToCanvas(0, 0, scale, ox, oy);
+    ctx.strokeStyle = '#2d3a55'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(ox2 - 12, oy2); ctx.lineTo(ox2 + 12, oy2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox2, oy2 - 12); ctx.lineTo(ox2, oy2 + 12); ctx.stroke();
+
+    // Trail
+    if (trail.length > 1) {
+      ctx.beginPath();
+      ctx.strokeStyle = '#2563eb66';
+      ctx.lineWidth = 2;
+      let [tx, ty] = worldToCanvas(trail[0].x, trail[0].y, scale, ox, oy);
+      ctx.moveTo(tx, ty);
+      for (let i = 1; i < trail.length; i++) {
+        [tx, ty] = worldToCanvas(trail[i].x, trail[i].y, scale, ox, oy);
+        ctx.lineTo(tx, ty);
+      }
+      ctx.stroke();
+    }
+
+    // Car body
+    const [cx2, cy2] = worldToCanvas(carState.x, carState.y, scale, ox, oy);
+    const headRad = (carState.heading * Math.PI) / 180;
+    ctx.save();
+    ctx.translate(cx2, cy2);
+    ctx.rotate(headRad);
+
+    // Body rectangle
+    ctx.fillStyle = carState.running ? '#1a6b2f' : '#5a1515';
+    ctx.strokeStyle = carState.running ? '#4caf50' : '#f44336';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-8, -14, 16, 28, 3);
+    ctx.fill(); ctx.stroke();
+
+    // Wheels
+    ctx.fillStyle = '#111';
+    [[-9,-10],[-9,6],[9,-10],[9,6]].forEach(([wx,wy]) => {
+      ctx.fillRect(wx-2, wy-4, 4, 8);
+    });
+
+    // Headlights
+    if (carState.lights) {
+      ctx.fillStyle = '#ffe57a';
+      ctx.fillRect(-6, -15, 5, 3);
+      ctx.fillRect(1,  -15, 5, 3);
+    }
+
+    // Arrow (heading indicator)
+    ctx.strokeStyle = '#ffe57a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -14); ctx.lineTo(0, -22);
+    ctx.moveTo(0, -22); ctx.lineTo(-4, -18);
+    ctx.moveTo(0, -22); ctx.lineTo(4, -18);
+    ctx.stroke();
+
+    ctx.restore();
+
+    // Coords label
+    ctx.fillStyle = '#8892b0';
+    ctx.font = '11px monospace';
+    ctx.fillText(`(${carState.x.toFixed(1)}, ${carState.y.toFixed(1)})`, cx2 + 14, cy2 - 8);
+  }
+
+  // ── State panel ───────────────────────────────────
+  function updateStatePanel(state) {
+    document.getElementById('s-x').textContent       = state.x.toFixed(2);
+    document.getElementById('s-y').textContent       = state.y.toFixed(2);
+    document.getElementById('s-heading').textContent = state.heading.toFixed(1) + '°';
+    document.getElementById('s-speed').textContent   = state.speed.toFixed(0) + '/100';
+    const lights = document.getElementById('s-lights');
+    lights.textContent = state.lights ? 'ON' : 'OFF';
+    lights.className = 'value ' + (state.lights ? 'warn' : '');
+    const run = document.getElementById('s-running');
+    run.textContent = state.running ? 'Running' : 'Stopped';
+    run.className = 'value ' + (state.running ? 'ok' : 'err');
+  }
+
+  function onState(state) {
+    carState = state;
+    trail.push({x: state.x, y: state.y});
+    if (trail.length > 500) trail.shift();
+    updateStatePanel(state);
+    drawTrack();
+  }
+
+  // ── Log ───────────────────────────────────────────
+  const logBox = document.getElementById('log-box');
+  function addLog(text, cls = '') {
+    const div = document.createElement('div');
+    div.className = 'log-entry ' + cls;
+    div.textContent = new Date().toLocaleTimeString() + '  ' + text;
+    logBox.prepend(div);
+    if (logBox.children.length > 120) logBox.lastChild.remove();
+  }
+
+  // ── WebSocket ─────────────────────────────────────
+  let ws = null;
+
+  function connect() {
+    const url = document.getElementById('server-input').value.trim();
+    if (ws) { ws.close(); ws = null; }
+    ws = new WebSocket(url);
+
+    ws.onopen = () => {
+      document.getElementById('conn-dot').className = 'connected';
+      document.getElementById('conn-label').textContent = 'Connected to ' + url;
+      document.getElementById('conn-btn').textContent = 'Disconnect';
+      addLog('Connected', 'evt');
+    };
+
+    ws.onclose = () => {
+      document.getElementById('conn-dot').className = '';
+      document.getElementById('conn-label').textContent = 'Disconnected';
+      document.getElementById('conn-btn').textContent = 'Connect';
+      addLog('Disconnected', 'evt');
+      ws = null;
+    };
+
+    ws.onerror = () => addLog('WebSocket error', 'err');
+
+    ws.onmessage = ({data}) => {
+      const msg = JSON.parse(data);
+      if (msg.event === 'welcome') {
+        addLog('Server: ' + msg.message, 'evt');
+        onState(msg.state);
+      } else if (msg.event === 'state_update') {
+        onState(msg.state);
+      } else if (msg.ok === false) {
+        addLog('ERR: ' + msg.error, 'err');
+      } else if (msg.ok === true) {
+        if (msg.state) onState(msg.state);
+        else if (msg.state !== undefined) onState(msg.state);
+        const detail = msg.message || JSON.stringify(
+          Object.fromEntries(Object.entries(msg).filter(([k]) => !['ok','command','state'].includes(k)))
+        );
+        addLog((msg.command || '?') + ' → ' + detail, 'ok');
+      }
+    };
+  }
+
+  document.getElementById('conn-btn').onclick = () => {
+    if (ws) { ws.close(); } else { connect(); }
+  };
+
+  function send(cmd) {
+    if (!ws || ws.readyState !== 1) { addLog('Not connected', 'err'); return; }
+    addLog('>>> ' + cmd);
+    ws.send(cmd);
+  }
+
+  const input = document.getElementById('cmd-input');
+  document.getElementById('cmd-btn').onclick = () => {
+    const v = input.value.trim();
+    if (v) { send(v); input.value = ''; }
+  };
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('cmd-btn').click();
+  });
+
+  // Auto-connect on load
+  connect();
+</script>
+</body>
+</html>
