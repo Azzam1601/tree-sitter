@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b1120">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>مورا — التطبيق الشامل · تجريبي داخلي</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"مورا الشامل","short_name":"مورا","start_url":"./","display":"standalone","background_color":"#0b1120","theme_color":"#0b1120","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 rx=%2232%22 fill=%22%230b1120%22/><text x=%2296%22 y=%22120%22 font-size=%2280%22 fill=%22%23f59e0b%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-weight=%22bold%22>م</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+<style>
+:root {
+  --bg: #0b1120;
+  --surface: #131a2b;
+  --surface-2: #1c2438;
+  --border: #2a3450;
+  --text: #e8ecf5;
+  --text-dim: #9aa3b8;
+  --accent: #f59e0b;
+  --accent-dim: #b57508;
+  --ok: #10b981;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+[data-theme="light"] {
+  --bg: #f7f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f7;
+  --border: #d4dae6;
+  --text: #0b1120;
+  --text-dim: #64748b;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Tajawal', 'Cairo', -apple-system, 'Segoe UI', 'Noto Sans Arabic', 'Amiri', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  overscroll-behavior: none;
+}
+#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+/* Header */
+.header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-title { flex: 1; font-weight: 700; font-size: 16px; }
+.header-title small { display: block; font-weight: 400; font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.icon-btn {
+  position: relative; width: 40px; height: 40px;
+  border-radius: 10px; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  border: none; color: var(--text); cursor: pointer;
+  font-size: 20px;
+}
+.icon-btn:active { background: var(--border); }
+.badge {
+  position: absolute; top: -4px; left: -4px;
+  min-width: 20px; height: 20px; padding: 0 5px;
+  background: var(--danger); color: white;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--surface);
+}
+.badge.hidden { display: none; }
+
+/* Main scroll area */
+.main { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 100px; }
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; justify-content: space-around;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  z-index: 10;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 12px; border: none; background: transparent;
+  color: var(--text-dim); font-size: 11px; cursor: pointer;
+  border-radius: 8px; min-width: 60px;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item span:first-child { font-size: 22px; }
+
+/* Cards */
+.card {
+  background: var(--surface); border-radius: 14px;
+  padding: 16px; margin-bottom: 12px;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title { font-weight: 700; font-size: 15px; }
+.card-sub { color: var(--text-dim); font-size: 12px; }
+
+/* Tiles */
+.tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile {
+  background: var(--surface); border-radius: 14px;
+  padding: 20px 16px; border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer; position: relative;
+  box-shadow: var(--shadow); text-align: center;
+}
+.tile:active { transform: scale(0.97); }
+.tile-icon { font-size: 36px; }
+.tile-name { font-weight: 700; font-size: 14px; }
+.tile-sub { color: var(--text-dim); font-size: 11px; }
+.tile-badge {
+  position: absolute; top: 10px; left: 10px;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  background: var(--danger); color: white;
+  border-radius: 11px; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 18px; border-radius: 10px; border: none;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; width: 100%;
+}
+.btn-primary { background: var(--accent); color: #1a1200; }
+.btn-primary:active { background: var(--accent-dim); }
+.btn-ghost { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-ok { background: var(--ok); color: white; }
+.btn-sm { padding: 8px 12px; font-size: 13px; width: auto; }
+
+/* Forms */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 13px; margin-bottom: 6px; color: var(--text-dim); }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text); font-family: inherit; font-size: 14px;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+.field textarea { min-height: 80px; resize: vertical; }
+
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; }
+
+/* Status pills */
+.pill {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 12px; font-size: 11px; font-weight: 600;
+}
+.pill-ok { background: rgba(16,185,129,0.15); color: var(--ok); }
+.pill-warn { background: rgba(245,158,11,0.15); color: var(--warn); }
+.pill-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+.pill-info { background: rgba(59,130,246,0.15); color: var(--info); }
+.pill-dim { background: var(--surface-2); color: var(--text-dim); }
+
+/* Login */
+.login-wrap {
+  height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 24px;
+}
+.login-logo {
+  width: 88px; height: 88px; border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; font-weight: 800; color: #1a1200;
+  margin-bottom: 20px;
+}
+.login-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.login-sub { color: var(--text-dim); font-size: 13px; margin-bottom: 30px; text-align: center; }
+
+.role-list { width: 100%; max-width: 380px; }
+.role-btn {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 14px; margin-bottom: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text); cursor: pointer;
+  font-family: inherit;
+}
+.role-btn:active { border-color: var(--accent); }
+.role-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: var(--surface-2); display: flex;
+  align-items: center; justify-content: center; font-size: 22px;
+}
+.role-name { flex: 1; text-align: start; font-weight: 700; }
+.role-name small { display: block; color: var(--text-dim); font-weight: 400; font-size: 11px; }
+
+.pin-wrap { width: 100%; max-width: 320px; }
+.pin-display {
+  display: flex; justify-content: center; gap: 12px; margin: 20px 0;
+}
+.pin-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border);
+}
+.pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+.pin-pad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.pin-key {
+  aspect-ratio: 1.6/1; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px;
+  font-size: 22px; font-weight: 600; color: var(--text);
+  cursor: pointer; font-family: inherit;
+}
+.pin-key:active { background: var(--surface-2); }
+.pin-hint {
+  font-size: 11px; color: var(--text-dim); text-align: center;
+  margin-top: 16px; padding: 8px; background: var(--surface-2);
+  border-radius: 8px; border: 1px dashed var(--border);
+}
+
+/* Tables/lists */
+.list-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.list-item:last-child { border-bottom: none; }
+.list-item-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--surface-2); display: flex;
+  align-items: center; justify-content: center; font-size: 18px;
+  flex-shrink: 0;
+}
+.list-item-body { flex: 1; min-width: 0; }
+.list-item-title { font-weight: 600; font-size: 14px; }
+.list-item-sub { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+
+/* Tank fill bars */
+.tank-row { margin-bottom: 14px; }
+.tank-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+.tank-bar { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.tank-fill { height: 100%; background: var(--ok); border-radius: 5px; transition: width .3s; }
+.tank-fill.warn { background: var(--warn); }
+.tank-fill.danger { background: var(--danger); }
+
+/* Toasts */
+#toasts { position: fixed; top: 70px; left: 16px; right: 16px; z-index: 100; pointer-events: none; }
+.toast {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;
+  box-shadow: var(--shadow); animation: slideIn .3s;
+}
+.toast.ok { border-right: 4px solid var(--ok); }
+.toast.warn { border-right: 4px solid var(--warn); }
+.toast.danger { border-right: 4px solid var(--danger); }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } }
+
+/* Sections */
+h2.section { font-size: 13px; color: var(--text-dim); margin: 16px 0 8px; font-weight: 600; }
+h3.section { font-size: 14px; margin: 12px 0 8px; font-weight: 700; }
+
+/* Utils */
+.hidden { display: none !important; }
+.text-c { text-align: center; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mt-16 { margin-top: 16px; }
+.flex { display: flex; gap: 8px; }
+.grow { flex: 1; }
+.small { font-size: 12px; color: var(--text-dim); }
+.big-number { font-size: 28px; font-weight: 800; color: var(--accent); }
+
+/* Print */
+@media print {
+  body { background: white; color: black; }
+  .header, .bottom-nav, .icon-btn, #toasts { display: none !important; }
+  .main { overflow: visible; padding: 0; }
+  .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="toasts"></div>
+
+<script>
+/* ============================================================
+   مورا — التطبيق الشامل · v1.0 تجريبي داخلي
+   ملف واحد PWA · عربي RTL · localStorage · Push notifications
+   ============================================================ */
+
+// ---------- SEED DATA ----------
+const STATION = { id: 'SA-014', name: 'محطة مورا — طريق الملك عبدالله' };
+const PRICES = { p91: 2.18, p95: 2.33, diesel: 1.15 };
+const TANK_CAPS = { p91: 40000, p95: 30000, diesel: 25000 };
+
+const ROLES = {
+  operator:         { name: 'موظف المبيعات',   icon: '⛽', modules: ['sales','notifications'] },
+  supervisor:       { name: 'مشرف الوردية',    icon: '👷', modules: ['sales','maintenance','notifications'] },
+  manager:          { name: 'مدير الموقع',     icon: '🧑‍💼', modules: ['sales','maintenance','customer','notifications'] },
+  accountant:       { name: 'المحاسب',         icon: '📊', modules: ['sales','reports','notifications'] },
+  gm:               { name: 'المدير العام',    icon: '👑', modules: ['sales','maintenance','customer','reports','audit','notifications'] },
+  maintenance:      { name: 'فني الصيانة',     icon: '🔧', modules: ['maintenance','notifications'] },
+  customer_service: { name: 'خدمة العملاء',    icon: '🎧', modules: ['customer','notifications'] },
+};
+
+const MODULES = {
+  sales:         { name: 'المبيعات',      icon: '⛽' },
+  maintenance:   { name: 'الصيانة',       icon: '🔧' },
+  customer:      { name: 'خدمة العملاء',  icon: '🎧' },
+  notifications: { name: 'التنبيهات',     icon: '🔔' },
+  reports:       { name: 'التقارير',      icon: '📊' },
+  audit:         { name: 'سجل التدقيق',   icon: '🔍' },
+};
+
+// Seed pumps: 12 pumps (6 east, 6 west), each with 3 products
+function seedPumps() {
+  const pumps = [];
+  for (let i = 1; i <= 12; i++) {
+    const side = i <= 6 ? 'شرقي' : 'غربي';
+    const num = i <= 6 ? i : i - 6;
+    pumps.push({
+      id: `P${i}`,
+      name: `طرمبة ${num} (${side})`,
+      readings: {
+        p91:    { prev: 100000 + i * 1200, curr: null },
+        p95:    { prev: 50000  + i * 800,  curr: null },
+        diesel: { prev: 30000  + i * 500,  curr: null },
+      },
+    });
+  }
+  return pumps;
+}
+
+// ---------- STORAGE ----------
+const KEYS = {
+  users: 'mora_users', pumps: 'mora_pumps', tanks: 'mora_tanks',
+  sales: 'mora_sales', maintenance: 'mora_maintenance', customer: 'mora_customer',
+  notifs: 'mora_notifications', audit: 'mora_audit', session: 'mora_session',
+  theme: 'mora_theme',
+};
+const store = {
+  get(k, fb) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch { return fb; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); },
+};
+
+function initSeed() {
+  if (!store.get(KEYS.pumps)) store.set(KEYS.pumps, seedPumps());
+  if (!store.get(KEYS.tanks)) store.set(KEYS.tanks, { p91: 28000, p95: 12000, diesel: 18500 });
+  if (!store.get(KEYS.sales)) store.set(KEYS.sales, []);
+  if (!store.get(KEYS.audit)) store.set(KEYS.audit, []);
+
+  if (!store.get(KEYS.maintenance)) {
+    store.set(KEYS.maintenance, [
+      { id: 'M001', type: 'طرمبة', location: 'P3', severity: 'حرج',
+        desc: 'الطرمبة رقم 3 لا تُخرج ديزل', status: 'مفتوح',
+        createdBy: 'operator', createdAt: Date.now() - 3600000, cost: null },
+      { id: 'M002', type: 'نظام حريق', location: 'المبنى الرئيسي', severity: 'متوسط',
+        desc: 'فحص دوري لطفايات الحريق', status: 'قيد المعالجة',
+        createdBy: 'manager', createdAt: Date.now() - 86400000, cost: null },
+      { id: 'M003', type: 'كهرباء', location: 'الإضاءة الخارجية', severity: 'منخفض',
+        desc: 'استبدال 3 لمبات LED', status: 'مغلق',
+        createdBy: 'supervisor', createdAt: Date.now() - 172800000, cost: 450 },
+    ]);
+  }
+
+  if (!store.get(KEYS.customer)) {
+    store.set(KEYS.customer, [
+      { id: 'C001', name: 'محمد الأحمد', phone: '05xxxxxxxx', category: 'جودة الوقود',
+        desc: 'شكوى من أداء السيارة بعد التزود بـ 91', status: 'قيد الحل',
+        createdAt: Date.now() - 7200000, response: null },
+      { id: 'C002', name: 'سارة عبدالله', phone: '05xxxxxxxx', category: 'الخدمة والمعاملة',
+        desc: 'شكر لموظف الوردية على المساعدة', status: 'مُغلقة (محلولة)',
+        createdAt: Date.now() - 86400000, response: 'تم إبلاغ الموظف والإدارة' },
+    ]);
+  }
+
+  if (!store.get(KEYS.notifs)) {
+    store.set(KEYS.notifs, [
+      { id: 'N001', type: 'بلاغ صيانة', title: 'بلاغ حرج: طرمبة 3', body: 'الديزل لا يُخرج — بحاجة صيانة فورية',
+        target: ['maintenance','gm','manager'], createdAt: Date.now() - 3600000, read: false, linkedId: 'M001' },
+      { id: 'N002', type: 'شكوى عميل', title: 'شكوى جودة وقود', body: 'محمد الأحمد — أداء السيارة بعد 91',
+        target: ['customer_service','gm'], createdAt: Date.now() - 7200000, read: false, linkedId: 'C001' },
+      { id: 'N003', type: 'تنبيه مخزون', title: 'خزان 95 تحت 35%', body: 'المستوى الحالي 12,000 لتر من 30,000 (40%)',
+        target: ['manager','gm','supervisor'], createdAt: Date.now() - 10800000, read: true, linkedId: null },
+      { id: 'N004', type: 'صيانة دورية مستحقة', title: 'فحص طفايات الحريق', body: 'موعد الفحص خلال 3 أيام (صروح المجد)',
+        target: ['manager','gm','maintenance'], createdAt: Date.now() - 21600000, read: false, linkedId: 'M002' },
+    ]);
+  }
+}
+
+// ---------- STATE ----------
+const state = {
+  session: store.get(KEYS.session, null),
+  screen: 'login',
+  module: null,
+  detail: null,
+  loginRole: null,
+  pinBuf: '',
+};
+
+// ---------- HELPERS ----------
+function money(n) { return (n||0).toLocaleString('ar-SA', { maximumFractionDigits: 2 }); }
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'الآن';
+  if (s < 3600) return `منذ ${Math.floor(s/60)} د`;
+  if (s < 86400) return `منذ ${Math.floor(s/3600)} س`;
+  return `منذ ${Math.floor(s/86400)} يوم`;
+}
+function uid(p='X') { return p + Date.now().toString(36) + Math.floor(Math.random()*1000); }
+
+function toast(msg, kind='ok') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + kind;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function logAudit(action, details = {}) {
+  const audit = store.get(KEYS.audit, []);
+  audit.unshift({
+    id: uid('A'), ts: Date.now(),
+    user: state.session?.role || 'anonymous',
+    action, details,
+  });
+  store.set(KEYS.audit, audit.slice(0, 500));
+}
+
+function unreadCount() {
+  if (!state.session) return 0;
+  const notifs = store.get(KEYS.notifs, []);
+  return notifs.filter(n => !n.read && n.target.includes(state.session.role)).length;
+}
+
+function pushNotify(notif) {
+  const notifs = store.get(KEYS.notifs, []);
+  notifs.unshift({ ...notif, id: uid('N'), createdAt: Date.now(), read: false });
+  store.set(KEYS.notifs, notifs);
+  // Try real push
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try { new Notification(notif.title, { body: notif.body, tag: notif.type }); } catch {}
+  }
+}
+
+// ---------- ROUTER / RENDER ----------
+function goTo(screen, module, detail) {
+  state.screen = screen;
+  if (module !== undefined) state.module = module;
+  if (detail !== undefined) state.detail = detail;
+  render();
+  document.querySelector('.main')?.scrollTo({ top: 0 });
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if (!state.session) { app.innerHTML = renderLogin(); attachLogin(); return; }
+  const s = state.session;
+  const role = ROLES[s.role];
+  const modulesForRole = role.modules;
+  const currentModuleName = state.module ? (MODULES[state.module]?.name || '') : 'الرئيسية';
+  app.innerHTML = `
+    <div class="header">
+      <div class="header-title">
+        ${state.screen === 'home' ? 'مورا الشامل' : currentModuleName}
+        <small>${STATION.name} · ${role.name}</small>
+      </div>
+      <button class="icon-btn" onclick="goTo('notifications-list', 'notifications')">
+        🔔
+        <span class="badge ${unreadCount() === 0 ? 'hidden' : ''}">${unreadCount()}</span>
+      </button>
+      <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+      ${state.screen !== 'home' ? `<button class="icon-btn" onclick="goTo('home', null, null)">🏠</button>` : ''}
+      <button class="icon-btn" onclick="logout()">↩︎</button>
+    </div>
+    <div class="main">${renderScreen()}</div>
+    ${renderBottomNav(modulesForRole)}
+  `;
+  attachHandlers();
+}
+
+function renderBottomNav(modules) {
+  const list = modules.filter(m => m !== 'notifications').slice(0, 5);
+  return `<div class="bottom-nav">
+    <button class="nav-item ${state.screen==='home'?'active':''}" onclick="goTo('home', null, null)">
+      <span>🏠</span><span>الرئيسية</span>
+    </button>
+    ${list.map(m => `
+      <button class="nav-item ${state.module===m?'active':''}" onclick="goTo('module-${m}', '${m}', null)">
+        <span>${MODULES[m].icon}</span><span>${MODULES[m].name}</span>
+      </button>
+    `).join('')}
+  </div>`;
+}
+
+function renderScreen() {
+  switch (state.screen) {
+    case 'home': return renderHome();
+    case 'module-sales': return renderSalesHome();
+    case 'sales-pump-list': return renderPumpList();
+    case 'sales-pump-read': return renderPumpRead();
+    case 'sales-cash': return renderCashReconciliation();
+    case 'sales-tanks': return renderTanks();
+    case 'sales-shift-report': return renderShiftReport();
+    case 'module-maintenance': return renderMaintenanceHome();
+    case 'maintenance-new': return renderMaintenanceNew();
+    case 'maintenance-detail': return renderMaintenanceDetail();
+    case 'module-customer': return renderCustomerHome();
+    case 'customer-new': return renderCustomerNew();
+    case 'customer-detail': return renderCustomerDetail();
+    case 'notifications-list': return renderNotifications();
+    case 'module-audit': return renderAudit();
+    case 'module-reports': return renderReports();
+    case 'settings': return renderSettings();
+    default: return `<div class="card">شاشة غير معروفة</div>`;
+  }
+}
+
+// ---------- LOGIN ----------
+function renderLogin() {
+  if (!state.loginRole) {
+    return `<div class="login-wrap">
+      <div class="login-logo">م</div>
+      <div class="login-title">مورا — التطبيق الشامل</div>
+      <div class="login-sub">${STATION.name}<br>v1.0 · تجريبي داخلي — للاعتماد الرسمي</div>
+      <div class="role-list">
+        <h2 class="section text-c">اختر دورك</h2>
+        ${Object.entries(ROLES).map(([id, r]) => `
+          <button class="role-btn" data-role="${id}">
+            <div class="role-icon">${r.icon}</div>
+            <div class="role-name">${r.name}<small>${r.modules.length} وحدة متاحة</small></div>
+            <div>←</div>
+          </button>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+  const role = ROLES[state.loginRole];
+  return `<div class="login-wrap">
+    <div class="login-logo">${role.icon}</div>
+    <div class="login-title">${role.name}</div>
+    <div class="login-sub">أدخل رمز الدخول (PIN)</div>
+    <div class="pin-wrap">
+      <div class="pin-display">
+        ${[0,1,2,3].map(i => `<div class="pin-dot ${state.pinBuf.length > i ? 'filled' : ''}"></div>`).join('')}
+      </div>
+      <div class="pin-pad">
+        ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="pin-key" data-pin="${n}">${n}</button>`).join('')}
+        <button class="pin-key" data-pin="back">⌫</button>
+        <button class="pin-key" data-pin="0">0</button>
+        <button class="pin-key" data-pin="back-role">←</button>
+      </div>
+      <div class="pin-hint">🔑 في النموذج التجريبي: كل الأدوار تستخدم <b>1234</b></div>
+    </div>
+  </div>`;
+}
+function attachLogin() {
+  document.querySelectorAll('.role-btn').forEach(b => {
+    b.onclick = () => { state.loginRole = b.dataset.role; state.pinBuf = ''; render(); };
+  });
+  document.querySelectorAll('.pin-key').forEach(k => {
+    k.onclick = () => {
+      const v = k.dataset.pin;
+      if (v === 'back') state.pinBuf = state.pinBuf.slice(0, -1);
+      else if (v === 'back-role') { state.loginRole = null; state.pinBuf = ''; }
+      else if (state.pinBuf.length < 4) state.pinBuf += v;
+      if (state.pinBuf.length === 4) {
+        if (state.pinBuf === '1234') {
+          state.session = { role: state.loginRole, since: Date.now() };
+          store.set(KEYS.session, state.session);
+          logAudit('login');
+          state.loginRole = null; state.pinBuf = '';
+          state.screen = 'home';
+          toast('مرحباً — تم تسجيل الدخول بنجاح', 'ok');
+          requestPushPermission();
+        } else {
+          toast('PIN غير صحيح', 'danger');
+          state.pinBuf = '';
+        }
+      }
+      render();
+    };
+  });
+}
+function logout() {
+  logAudit('logout');
+  state.session = null;
+  store.set(KEYS.session, null);
+  state.screen = 'login';
+  render();
+}
+
+// ---------- HOME ----------
+function renderHome() {
+  const role = ROLES[state.session.role];
+  const tiles = role.modules.map(m => {
+    const meta = MODULES[m];
+    let badge = 0;
+    if (m === 'notifications') badge = unreadCount();
+    if (m === 'maintenance') badge = store.get(KEYS.maintenance,[]).filter(x=>x.status!=='مغلق').length;
+    if (m === 'customer') badge = store.get(KEYS.customer,[]).filter(x=>!x.status.includes('مُغلقة')).length;
+    return `<div class="tile" onclick="goTo('${m==='notifications'?'notifications-list':'module-'+m}', '${m}', null)">
+      ${badge > 0 ? `<div class="tile-badge">${badge}</div>` : ''}
+      <div class="tile-icon">${meta.icon}</div>
+      <div class="tile-name">${meta.name}</div>
+      <div class="tile-sub">${moduleSubtitle(m)}</div>
+    </div>`;
+  }).join('');
+
+  const stats = getHomeStats();
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">أهلاً ${role.name}</div>
+          <div class="card-sub">${new Date().toLocaleDateString('ar-SA', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</div>
+        </div>
+        <div class="pill pill-info">${state.session.role}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+        <div><div class="big-number" style="font-size:20px;">${stats.openIssues}</div><div class="small">بلاغات مفتوحة</div></div>
+        <div><div class="big-number" style="font-size:20px;">${stats.openComplaints}</div><div class="small">شكاوى نشطة</div></div>
+        <div><div class="big-number" style="font-size:20px;">${unreadCount()}</div><div class="small">تنبيهات</div></div>
+      </div>
+    </div>
+    <h2 class="section">الوحدات المتاحة</h2>
+    <div class="tile-grid">${tiles}</div>
+    <div class="card mt-16">
+      <div class="card-header"><div class="card-title">⚙️ إعدادات وأدوات</div></div>
+      <button class="btn btn-ghost mb-8" onclick="goTo('settings', null, null)">إعدادات التطبيق</button>
+      ${state.session.role === 'gm' ? `<button class="btn btn-ghost" onclick="goTo('module-audit', 'audit', null)">🔍 سجل التدقيق (${store.get(KEYS.audit,[]).length})</button>` : ''}
+    </div>
+  `;
+}
+function moduleSubtitle(m) {
+  if (m === 'sales') return 'الطرمبات والصندوق';
+  if (m === 'maintenance') return 'البلاغات والفحص';
+  if (m === 'customer') return 'الشكاوى والردود';
+  if (m === 'notifications') return 'مركز الإشعارات';
+  if (m === 'reports') return 'المالية والوردية';
+  if (m === 'audit') return 'العمليات الموثّقة';
+  return '';
+}
+function getHomeStats() {
+  return {
+    openIssues: store.get(KEYS.maintenance,[]).filter(x=>x.status!=='مغلق').length,
+    openComplaints: store.get(KEYS.customer,[]).filter(x=>!x.status.includes('مُغلقة')).length,
+  };
+}
+
+// ---------- SALES ----------
+function renderSalesHome() {
+  const tanks = store.get(KEYS.tanks);
+  return `
+    <div class="tile-grid">
+      <div class="tile" onclick="goTo('sales-pump-list')"><div class="tile-icon">⛽</div><div class="tile-name">قراءة الطرمبات</div><div class="tile-sub">12 طرمبة</div></div>
+      <div class="tile" onclick="goTo('sales-tanks')"><div class="tile-icon">🛢️</div><div class="tile-name">حالة الخزانات</div><div class="tile-sub">3 خزانات</div></div>
+      <div class="tile" onclick="goTo('sales-cash')"><div class="tile-icon">💰</div><div class="tile-name">تسوية الصندوق</div><div class="tile-sub">حسب الوسيلة</div></div>
+      <div class="tile" onclick="goTo('sales-shift-report')"><div class="tile-icon">📄</div><div class="tile-name">تقرير الوردية</div><div class="tile-sub">طباعة PDF</div></div>
+    </div>
+    <div class="card mt-16">
+      <div class="card-header"><div class="card-title">🛢️ نظرة سريعة على الخزانات</div></div>
+      ${['p91','p95','diesel'].map(k => tankRow(k, tanks[k])).join('')}
+    </div>
+  `;
+}
+function tankRow(k, curr) {
+  const cap = TANK_CAPS[k];
+  const pct = Math.round(curr / cap * 100);
+  const cls = pct < 20 ? 'danger' : pct < 35 ? 'warn' : '';
+  const label = { p91:'بنزين 91', p95:'بنزين 95', diesel:'ديزل' }[k];
+  return `<div class="tank-row">
+    <div class="tank-label"><span>${label}</span><span>${money(curr)} / ${money(cap)} لتر (${pct}%)</span></div>
+    <div class="tank-bar"><div class="tank-fill ${cls}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function renderPumpList() {
+  const pumps = store.get(KEYS.pumps);
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-title">اختر طرمبة</div><div class="card-sub">${pumps.length} طرمبة</div></div>
+      ${pumps.map(p => `
+        <div class="list-item" onclick="goTo('sales-pump-read', 'sales', '${p.id}')">
+          <div class="list-item-icon">⛽</div>
+          <div class="list-item-body">
+            <div class="list-item-title">${p.name}</div>
+            <div class="list-item-sub">آخر قراءة 91: ${money(p.readings.p91.prev)}</div>
+          </div>
+          <div>←</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderPumpRead() {
+  const pumps = store.get(KEYS.pumps);
+  const p = pumps.find(x => x.id === state.detail);
+  if (!p) return '<div class="card">لم توجد الطرمبة</div>';
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">${p.name}</div><div class="card-sub">أدخل القراءات الحالية</div></div>
+      </div>
+      ${['p91','p95','diesel'].map(k => {
+        const label = { p91:'بنزين 91', p95:'بنزين 95', diesel:'ديزل' }[k];
+        return `
+          <h3 class="section">${label} — سعر ${PRICES[k]} ر.س/لتر</h3>
+          <div class="row">
+            <div class="field"><label>قراءة سابقة</label><input type="number" value="${p.readings[k].prev}" disabled></div>
+            <div class="field"><label>قراءة حالية</label><input type="number" id="curr-${k}" placeholder="أدخل"></div>
+          </div>
+        `;
+      }).join('')}
+      <h3 class="section">💳 حصر الدفعات (ر.س)</h3>
+      <div class="row">
+        <div class="field"><label>كاش</label><input type="number" id="pay-cash" placeholder="0"></div>
+        <div class="field"><label>فيزا</label><input type="number" id="pay-visa" placeholder="0"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>مدى</label><input type="number" id="pay-mada" placeholder="0"></div>
+        <div class="field"><label>الراجحي</label><input type="number" id="pay-rajhi" placeholder="0"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>ساب</label><input type="number" id="pay-sab" placeholder="0"></div>
+        <div class="field"><label>أخرى</label><input type="number" id="pay-other" placeholder="0"></div>
+      </div>
+      <div class="card" style="background:var(--surface-2);margin-top:12px;">
+        <div class="card-sub">⚠️ سياسة صفر تسامح: أي فرق بين إجمالي المبيعات المحسوب من العدادات وإجمالي الدفعات يمنع الحفظ إلا بموافقة ثلاثية (المشرف + المحاسب + المدير العام).</div>
+      </div>
+      <button class="btn btn-primary mt-16" onclick="submitPumpReading('${p.id}')">💾 حفظ القراءة والمطابقة</button>
+    </div>
+  `;
+}
+
+window.submitPumpReading = function(pumpId) {
+  const pumps = store.get(KEYS.pumps);
+  const p = pumps.find(x => x.id === pumpId);
+  const curr = {};
+  const liters = {};
+  let total = 0;
+  for (const k of ['p91','p95','diesel']) {
+    const v = parseFloat(document.getElementById(`curr-${k}`).value);
+    if (!v || v < p.readings[k].prev) { toast(`قراءة ${k} غير صحيحة`, 'danger'); return; }
+    curr[k] = v;
+    liters[k] = v - p.readings[k].prev;
+    total += liters[k] * PRICES[k];
+  }
+  const pays = ['cash','visa','mada','rajhi','sab','other'].reduce((sum, w) => {
+    return sum + (parseFloat(document.getElementById(`pay-${w}`).value) || 0);
+  }, 0);
+  const diff = Math.abs(total - pays);
+  if (diff > 0.5) {
+    toast(`⛔ فرق ${money(diff)} ر.س — بحاجة اعتماد ثلاثي`, 'danger');
+    pushNotify({
+      type: 'طلب اعتماد', title: `فرق مطابقة على ${p.name}`,
+      body: `فرق ${money(diff)} ر.س بين العدادات (${money(total)}) والدفعات (${money(pays)})`,
+      target: ['supervisor','accountant','gm'], linkedId: pumpId,
+    });
+    logAudit('pump_read_mismatch', { pump: pumpId, expected: total, paid: pays, diff });
+    return;
+  }
+  // تحقق من كفاية المخزون قبل الخصم
+  const tanks = store.get(KEYS.tanks);
+  const labels = { p91:'بنزين 91', p95:'بنزين 95', diesel:'ديزل' };
+  for (const k of ['p91','p95','diesel']) {
+    if (liters[k] > tanks[k]) {
+      toast(`⛔ مخزون ${labels[k]} غير كاف (متبقي ${money(tanks[k])} لتر · مطلوب ${money(liters[k])})`, 'danger');
+      pushNotify({
+        type: 'تنبيه مخزون',
+        title: `🚨 قراءة تتجاوز الرصيد — ${labels[k]}`,
+        body: `${p.name}: بيع ${money(liters[k])} لتر بينما الرصيد ${money(tanks[k])} — تحقق فوري`,
+        target: ['manager','gm','supervisor','accountant'], linkedId: pumpId,
+      });
+      logAudit('stock_shortage_blocked', { pump: pumpId, product: k, need: liters[k], have: tanks[k] });
+      return;
+    }
+  }
+  // حفظ العدادات
+  for (const k of ['p91','p95','diesel']) p.readings[k].prev = curr[k];
+  store.set(KEYS.pumps, pumps);
+  // خصم من الخزانات + رصد عبور العتبات
+  const tanksBefore = { ...tanks };
+  for (const k of ['p91','p95','diesel']) {
+    tanks[k] = Math.max(0, tanks[k] - liters[k]);
+  }
+  store.set(KEYS.tanks, tanks);
+  for (const k of ['p91','p95','diesel']) {
+    const pctBefore = tanksBefore[k] / TANK_CAPS[k] * 100;
+    const pctAfter  = tanks[k]       / TANK_CAPS[k] * 100;
+    if (pctBefore >= 20 && pctAfter < 20) {
+      pushNotify({
+        type: 'تنبيه مخزون',
+        title: `🚨 خزان ${labels[k]} تحت 20%`,
+        body: `المستوى: ${money(tanks[k])} لتر (${Math.round(pctAfter)}%) — توريد عاجل`,
+        target: ['manager','gm','supervisor'], linkedId: null,
+      });
+    } else if (pctBefore >= 35 && pctAfter < 35) {
+      pushNotify({
+        type: 'تنبيه مخزون',
+        title: `⚠️ خزان ${labels[k]} تحت 35%`,
+        body: `المستوى: ${money(tanks[k])} لتر (${Math.round(pctAfter)}%)`,
+        target: ['manager','gm','supervisor'], linkedId: null,
+      });
+    }
+  }
+  // تسجيل عملية البيع
+  const sales = store.get(KEYS.sales, []);
+  sales.unshift({
+    id: uid('S'), pump: pumpId, liters, total, pays,
+    at: Date.now(), by: state.session.role,
+  });
+  store.set(KEYS.sales, sales);
+  logAudit('pump_read_saved', { pump: pumpId, liters, total, tanksAfter: tanks });
+  const totalLiters = liters.p91 + liters.p95 + liters.diesel;
+  toast(`✅ حفظ · ${money(totalLiters)} لتر · ${money(total)} ر.س · خُصمت من الخزانات`, 'ok');
+  goTo('module-sales', 'sales', null);
+};
+
+function renderCashReconciliation() {
+  const sales = store.get(KEYS.sales, []).filter(s => Date.now() - s.at < 86400000);
+  const total = sales.reduce((s, x) => s + x.total, 0);
+  const paid = sales.reduce((s, x) => s + x.pays, 0);
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-title">💰 تسوية الصندوق (آخر 24 ساعة)</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center;">
+        <div><div class="big-number">${money(total)}</div><div class="small">من العدادات</div></div>
+        <div><div class="big-number">${money(paid)}</div><div class="small">مقبوض</div></div>
+      </div>
+      <div class="card mt-16" style="background:${Math.abs(total-paid) > 0.5 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)'};">
+        الفرق: <b>${money(total - paid)} ر.س</b>
+      </div>
+      <h3 class="section">قراءات الوردية (${sales.length})</h3>
+      ${sales.length === 0 ? '<div class="small">لا قراءات مسجّلة اليوم</div>' :
+        sales.map(s => `<div class="list-item">
+          <div class="list-item-icon">⛽</div>
+          <div class="list-item-body">
+            <div class="list-item-title">${s.pump} — ${money(s.total)} ر.س</div>
+            <div class="list-item-sub">${timeAgo(s.at)} · ${s.by}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+function renderTanks() {
+  const tanks = store.get(KEYS.tanks);
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">🛢️ حالة الخزانات</div></div>
+    ${['p91','p95','diesel'].map(k => tankRow(k, tanks[k])).join('')}
+    <div class="card mt-16" style="background:var(--surface-2);">
+      <div class="small">⚠️ تنبيه أصفر عند &lt; 35% · تنبيه أحمر عند &lt; 20%. أي توريد جديد يحتاج قبول جزئي عند الإدخال ثم اعتماد نهائي بعد 3 موافقات.</div>
+    </div>
+  </div>`;
+}
+
+function renderShiftReport() {
+  const sales = store.get(KEYS.sales, []).filter(s => Date.now() - s.at < 86400000);
+  const total = sales.reduce((s, x) => s + x.total, 0);
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">📄 تقرير الوردية</div></div>
+    <p><b>المحطة:</b> ${STATION.name}</p>
+    <p><b>التاريخ:</b> ${new Date().toLocaleDateString('ar-SA')}</p>
+    <p><b>عدد القراءات:</b> ${sales.length}</p>
+    <p><b>إجمالي المبيعات:</b> ${money(total)} ر.س</p>
+    <button class="btn btn-primary mt-16" onclick="window.print()">🖨️ طباعة PDF</button>
+  </div>`;
+}
+
+// ---------- MAINTENANCE ----------
+function renderMaintenanceHome() {
+  const issues = store.get(KEYS.maintenance, []);
+  return `
+    <button class="btn btn-primary mb-16" onclick="goTo('maintenance-new')">➕ بلاغ عطل جديد</button>
+    <h2 class="section">البلاغات (${issues.length})</h2>
+    <div class="card">
+      ${issues.map(i => {
+        const p = i.severity === 'حرج' ? 'danger' : i.severity === 'متوسط' ? 'warn' : 'ok';
+        const s = i.status === 'مغلق' ? 'dim' : i.status === 'قيد المعالجة' ? 'info' : 'warn';
+        return `<div class="list-item" onclick="goTo('maintenance-detail', 'maintenance', '${i.id}')">
+          <div class="list-item-icon">🔧</div>
+          <div class="list-item-body">
+            <div class="list-item-title">${i.type} — ${i.location}</div>
+            <div class="list-item-sub">${i.desc.slice(0,50)}${i.desc.length>50?'...':''}</div>
+            <div style="margin-top:4px;"><span class="pill pill-${p}">${i.severity}</span> <span class="pill pill-${s}">${i.status}</span></div>
+          </div>
+          <div class="small">${timeAgo(i.createdAt)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderMaintenanceNew() {
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">➕ بلاغ عطل جديد</div></div>
+    <div class="field"><label>نوع العطل</label>
+      <select id="m-type">
+        <option>طرمبة</option><option>خزان</option><option>نظام حريق</option>
+        <option>كهرباء</option><option>مبنى</option><option>أخرى</option>
+      </select></div>
+    <div class="field"><label>الموقع (مثل P3، خزان 91، المبنى)</label>
+      <input id="m-location" placeholder="أدخل الموقع"></div>
+    <div class="field"><label>درجة الخطورة</label>
+      <select id="m-severity">
+        <option>منخفض</option><option>متوسط</option><option>حرج</option>
+      </select></div>
+    <div class="field"><label>وصف العطل</label>
+      <textarea id="m-desc" placeholder="اشرح المشكلة بالتفصيل"></textarea></div>
+    <button class="btn btn-primary" onclick="submitMaintenance()">📤 إرسال البلاغ</button>
+  </div>`;
+}
+
+window.submitMaintenance = function() {
+  const type = document.getElementById('m-type').value;
+  const location = document.getElementById('m-location').value.trim();
+  const severity = document.getElementById('m-severity').value;
+  const desc = document.getElementById('m-desc').value.trim();
+  if (!location || !desc) { toast('الرجاء تعبئة كل الحقول', 'danger'); return; }
+  const issues = store.get(KEYS.maintenance, []);
+  const issue = {
+    id: uid('M'), type, location, severity, desc,
+    status: 'مفتوح', createdBy: state.session.role, createdAt: Date.now(), cost: null,
+  };
+  issues.unshift(issue);
+  store.set(KEYS.maintenance, issues);
+  logAudit('maintenance_reported', { id: issue.id, type, severity });
+  // Push
+  const targets = severity === 'حرج' ? ['maintenance','gm','manager'] : ['maintenance','manager'];
+  pushNotify({
+    type: 'بلاغ صيانة',
+    title: `${severity === 'حرج' ? '🚨 ' : ''}بلاغ ${severity}: ${type}`,
+    body: `${location} — ${desc.slice(0,60)}`,
+    target: targets, linkedId: issue.id,
+  });
+  toast('✅ تم إرسال البلاغ وإشعار الفني', 'ok');
+  goTo('module-maintenance', 'maintenance', null);
+};
+
+function renderMaintenanceDetail() {
+  const issues = store.get(KEYS.maintenance, []);
+  const i = issues.find(x => x.id === state.detail);
+  if (!i) return '<div class="card">البلاغ غير موجود</div>';
+  const canProgress = ['maintenance','manager','gm'].includes(state.session.role) && i.status !== 'مغلق';
+  return `<div class="card">
+    <div class="card-header">
+      <div><div class="card-title">${i.type} — ${i.location}</div>
+      <div class="card-sub">${timeAgo(i.createdAt)} · بواسطة ${i.createdBy}</div></div>
+    </div>
+    <p>${i.desc}</p>
+    <div class="mb-16">
+      <span class="pill pill-${i.severity==='حرج'?'danger':i.severity==='متوسط'?'warn':'ok'}">${i.severity}</span>
+      <span class="pill pill-${i.status==='مغلق'?'dim':i.status==='قيد المعالجة'?'info':'warn'}">${i.status}</span>
+    </div>
+    ${i.cost !== null ? `<p><b>تكلفة الإصلاح:</b> ${money(i.cost)} ر.س ${i.cost > 5000 ? '<span class="pill pill-warn">يحتاج اعتماد المدير العام</span>' : ''}</p>` : ''}
+    ${canProgress ? `
+      ${i.status === 'مفتوح' ? '<button class="btn btn-primary mb-8" onclick="progressIssue(\''+i.id+'\',\'قيد المعالجة\')">▶️ بدء المعالجة</button>' : ''}
+      ${i.status === 'قيد المعالجة' ? `
+        <div class="field"><label>تكلفة الإصلاح (ر.س)</label><input type="number" id="i-cost" placeholder="0"></div>
+        <button class="btn btn-ok" onclick="closeIssue('${i.id}')">✅ إغلاق البلاغ</button>
+      ` : ''}
+    ` : ''}
+  </div>`;
+}
+
+window.progressIssue = function(id, newStatus) {
+  const issues = store.get(KEYS.maintenance, []);
+  const i = issues.find(x => x.id === id);
+  i.status = newStatus;
+  store.set(KEYS.maintenance, issues);
+  logAudit('maintenance_progress', { id, status: newStatus });
+  toast('✅ تم تحديث الحالة', 'ok');
+  render();
+};
+window.closeIssue = function(id) {
+  const cost = parseFloat(document.getElementById('i-cost').value) || 0;
+  const issues = store.get(KEYS.maintenance, []);
+  const i = issues.find(x => x.id === id);
+  i.status = 'مغلق'; i.cost = cost;
+  store.set(KEYS.maintenance, issues);
+  logAudit('maintenance_closed', { id, cost });
+  if (cost > 0) {
+    pushNotify({
+      type: 'طلب اعتماد',
+      title: `اعتماد تكلفة إصلاح ${money(cost)} ر.س`,
+      body: `${i.type} — ${i.location}${cost > 5000 ? ' (يتطلب اعتماد المدير العام)' : ''}`,
+      target: cost > 5000 ? ['accountant','gm'] : ['accountant'],
+      linkedId: id,
+    });
+  }
+  toast('✅ تم إغلاق البلاغ', 'ok');
+  goTo('module-maintenance', 'maintenance', null);
+};
+
+// ---------- CUSTOMER SERVICE ----------
+function renderCustomerHome() {
+  const list = store.get(KEYS.customer, []);
+  return `
+    <button class="btn btn-primary mb-16" onclick="goTo('customer-new')">➕ شكوى جديدة</button>
+    <h2 class="section">الشكاوى (${list.length})</h2>
+    <div class="card">
+      ${list.map(c => {
+        const s = c.status.includes('مُغلقة') ? 'ok' : c.status === 'قيد الحل' ? 'info' : 'warn';
+        return `<div class="list-item" onclick="goTo('customer-detail', 'customer', '${c.id}')">
+          <div class="list-item-icon">🎧</div>
+          <div class="list-item-body">
+            <div class="list-item-title">${c.name}</div>
+            <div class="list-item-sub">${c.category} · ${c.desc.slice(0,50)}${c.desc.length>50?'...':''}</div>
+            <div style="margin-top:4px;"><span class="pill pill-${s}">${c.status}</span></div>
+          </div>
+          <div class="small">${timeAgo(c.createdAt)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+function renderCustomerNew() {
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">➕ شكوى عميل جديدة</div></div>
+    <div class="field"><label>الاسم</label><input id="c-name" placeholder="اسم العميل"></div>
+    <div class="field"><label>الجوال</label><input id="c-phone" placeholder="05xxxxxxxx"></div>
+    <div class="field"><label>التصنيف</label>
+      <select id="c-category">
+        <option>جودة الوقود</option><option>الخدمة والمعاملة</option>
+        <option>الفاتورة والدفع</option><option>النظافة والمرافق</option><option>أخرى</option>
+      </select></div>
+    <div class="field"><label>وصف الشكوى</label><textarea id="c-desc" placeholder="اشرح الشكوى"></textarea></div>
+    <button class="btn btn-primary" onclick="submitComplaint()">📤 إرسال</button>
+  </div>`;
+}
+window.submitComplaint = function() {
+  const name = document.getElementById('c-name').value.trim();
+  const phone = document.getElementById('c-phone').value.trim();
+  const category = document.getElementById('c-category').value;
+  const desc = document.getElementById('c-desc').value.trim();
+  if (!name || !desc) { toast('الاسم والوصف مطلوبان', 'danger'); return; }
+  const list = store.get(KEYS.customer, []);
+  const c = { id: uid('C'), name, phone, category, desc, status: 'مستلمة', createdAt: Date.now(), response: null };
+  list.unshift(c);
+  store.set(KEYS.customer, list);
+  logAudit('complaint_received', { id: c.id, category });
+  const targets = category === 'جودة الوقود'
+    ? ['customer_service','gm','manager']
+    : ['customer_service','manager'];
+  pushNotify({
+    type: 'شكوى عميل',
+    title: `${category === 'جودة الوقود' ? '🚨 ' : ''}شكوى: ${category}`,
+    body: `${name} — ${desc.slice(0,60)}`,
+    target: targets, linkedId: c.id,
+  });
+  toast('✅ تم استلام الشكوى', 'ok');
+  goTo('module-customer', 'customer', null);
+};
+
+function renderCustomerDetail() {
+  const list = store.get(KEYS.customer, []);
+  const c = list.find(x => x.id === state.detail);
+  if (!c) return '<div class="card">الشكوى غير موجودة</div>';
+  const canRespond = ['customer_service','manager','gm'].includes(state.session.role);
+  return `<div class="card">
+    <div class="card-header">
+      <div><div class="card-title">${c.name}</div><div class="card-sub">${c.phone} · ${timeAgo(c.createdAt)}</div></div>
+    </div>
+    <p><b>التصنيف:</b> ${c.category}</p>
+    <p>${c.desc}</p>
+    <div class="mb-16"><span class="pill pill-${c.status.includes('مُغلقة')?'ok':c.status==='قيد الحل'?'info':'warn'}">${c.status}</span></div>
+    ${c.response ? `<div class="card" style="background:var(--surface-2);"><b>الرد الرسمي:</b><br>${c.response}</div>` : ''}
+    ${canRespond && !c.status.includes('مُغلقة') ? `
+      <div class="field"><label>الرد الرسمي</label><textarea id="c-response" placeholder="اكتب الرد"></textarea></div>
+      <div class="row">
+        <button class="btn btn-ok" onclick="resolveComplaint('${c.id}', true)">✅ حل الشكوى</button>
+        <button class="btn btn-danger" onclick="resolveComplaint('${c.id}', false)">❌ إغلاق دون حل</button>
+      </div>
+    ` : ''}
+  </div>`;
+}
+window.resolveComplaint = function(id, resolved) {
+  const list = store.get(KEYS.customer, []);
+  const c = list.find(x => x.id === id);
+  const resp = document.getElementById('c-response').value.trim();
+  if (!resp) { toast('اكتب الرد أولاً', 'danger'); return; }
+  c.status = resolved ? 'مُغلقة (محلولة)' : 'مُغلقة (لم تُحل)';
+  c.response = resp;
+  store.set(KEYS.customer, list);
+  logAudit('complaint_resolved', { id, resolved });
+  toast('✅ تم إغلاق الشكوى', 'ok');
+  goTo('module-customer', 'customer', null);
+};
+
+// ---------- NOTIFICATIONS ----------
+function renderNotifications() {
+  const notifs = store.get(KEYS.notifs, []).filter(n => n.target.includes(state.session.role));
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔔 مركز الإشعارات</div>
+        <button class="btn btn-sm btn-ghost" onclick="markAllRead()">تمييز الكل مقروء</button>
+      </div>
+      ${notifs.length === 0 ? '<div class="small text-c">لا إشعارات</div>' :
+        notifs.map(n => {
+          const icons = { 'طلب اعتماد':'📝','بلاغ صيانة':'🔧','شكوى عميل':'🎧',
+                          'إغلاق شهري':'📅','تنبيه مخزون':'🛢️','صيانة دورية مستحقة':'⏰' };
+          return `<div class="list-item" style="opacity:${n.read?0.6:1}">
+            <div class="list-item-icon">${icons[n.type]||'🔔'}</div>
+            <div class="list-item-body">
+              <div class="list-item-title">${n.title}</div>
+              <div class="list-item-sub">${n.body}</div>
+              <div class="small">${timeAgo(n.createdAt)} · ${n.type}</div>
+            </div>
+            ${!n.read ? '<div style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></div>' : ''}
+          </div>`;
+        }).join('')}
+    </div>
+  `;
+}
+window.markAllRead = function() {
+  const notifs = store.get(KEYS.notifs, []);
+  notifs.forEach(n => { if (n.target.includes(state.session.role)) n.read = true; });
+  store.set(KEYS.notifs, notifs);
+  logAudit('notifs_read_all');
+  render();
+};
+
+// ---------- AUDIT ----------
+function renderAudit() {
+  const audit = store.get(KEYS.audit, []);
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">🔍 سجل التدقيق</div><div class="card-sub">${audit.length} عملية · غير قابل للحذف</div></div>
+    ${audit.slice(0, 100).map(a => `
+      <div class="list-item">
+        <div class="list-item-icon">📋</div>
+        <div class="list-item-body">
+          <div class="list-item-title">${a.action}</div>
+          <div class="list-item-sub">${a.user} · ${timeAgo(a.ts)}${a.details && Object.keys(a.details).length ? ' · ' + JSON.stringify(a.details) : ''}</div>
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+// ---------- REPORTS ----------
+function renderReports() {
+  const sales = store.get(KEYS.sales, []);
+  const totalSales = sales.reduce((s, x) => s + x.total, 0);
+  const issues = store.get(KEYS.maintenance, []);
+  const closedIssues = issues.filter(i => i.status === 'مغلق');
+  const maintCost = closedIssues.reduce((s, i) => s + (i.cost || 0), 0);
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">📊 التقارير المالية</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center;">
+      <div><div class="big-number">${money(totalSales)}</div><div class="small">إجمالي المبيعات (ر.س)</div></div>
+      <div><div class="big-number">${money(maintCost)}</div><div class="small">تكاليف الصيانة (ر.س)</div></div>
+    </div>
+    <h3 class="section mt-16">آخر قراءات المبيعات</h3>
+    ${sales.slice(0,10).map(s => `<div class="list-item">
+      <div class="list-item-icon">⛽</div>
+      <div class="list-item-body">
+        <div class="list-item-title">${s.pump} — ${money(s.total)} ر.س</div>
+        <div class="list-item-sub">${timeAgo(s.at)} · ${s.by}</div>
+      </div>
+    </div>`).join('')}
+    ${sales.length === 0 ? '<div class="small">لا قراءات بعد</div>' : ''}
+  </div>`;
+}
+
+// ---------- SETTINGS ----------
+function renderSettings() {
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">⚙️ الإعدادات</div></div>
+    <button class="btn btn-ghost mb-8" onclick="toggleTheme()">🌓 تبديل الوضع (فاتح/داكن)</button>
+    <button class="btn btn-ghost mb-8" onclick="testPush()">🔔 اختبار Push Notification</button>
+    <button class="btn btn-ghost mb-8" onclick="requestPushPermission()">🔐 طلب إذن التنبيهات</button>
+    <button class="btn btn-danger mt-16" onclick="if(confirm('حذف كل البيانات المحلية؟')){localStorage.clear();location.reload();}">🗑️ إعادة تعيين النموذج</button>
+    <div class="card mt-16" style="background:var(--surface-2);">
+      <div class="small">
+        <b>نموذج تجريبي</b><br>
+        كل البيانات محفوظة محلياً في المتصفح (localStorage). لأي استخدام حقيقي بمواقع متعددة يحتاج قاعدة بيانات مركزية.
+        <br><br>
+        <b>الإصدار:</b> v1.0<br>
+        <b>الحساب الحالي:</b> ${ROLES[state.session.role].name}<br>
+        <b>المحطة:</b> ${STATION.name}
+      </div>
+    </div>
+  </div>`;
+}
+
+window.toggleTheme = function() {
+  const cur = document.documentElement.dataset.theme;
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  store.set(KEYS.theme, next);
+};
+window.testPush = function() {
+  if (!('Notification' in window)) { toast('المتصفح لا يدعم التنبيهات', 'danger'); return; }
+  if (Notification.permission !== 'granted') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') sendTestNotif();
+      else toast('تم رفض إذن التنبيهات', 'warn');
+    });
+  } else sendTestNotif();
+};
+function sendTestNotif() {
+  try {
+    new Notification('مورا — اختبار التنبيه', {
+      body: 'التنبيهات تعمل بنجاح ✅',
+      tag: 'test',
+    });
+    toast('✅ تم إرسال تنبيه اختبار', 'ok');
+  } catch (e) { toast('تعذّر إرسال التنبيه', 'danger'); }
+}
+window.requestPushPermission = function() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') toast('✅ تم منح إذن التنبيهات', 'ok');
+    });
+  }
+};
+
+// ---------- HANDLERS ----------
+function attachHandlers() { /* handlers are inline via onclick */ }
+
+// ---------- INIT ----------
+initSeed();
+const savedTheme = store.get(KEYS.theme, 'dark');
+document.documentElement.dataset.theme = savedTheme;
+
+if (state.session) state.screen = 'home';
+render();
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// Expose for debugging
+window.MORA = { state, store, KEYS, render, goTo };
+</script>
+</body>
+</html>
