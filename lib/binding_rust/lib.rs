@@ -3030,18 +3030,22 @@ impl QueryCursor {
     }
 
     /// Return the maximum number of in-progress matches for this cursor.
+    ///
+    /// Returns `None` if there is no limit (the default).
     #[doc(alias = "ts_query_cursor_match_limit")]
     #[must_use]
-    pub fn match_limit(&self) -> u32 {
-        unsafe { ffi::ts_query_cursor_match_limit(self.ptr.as_ptr()) }
+    pub fn match_limit(&self) -> Option<u32> {
+        let limit = unsafe { ffi::ts_query_cursor_match_limit(self.ptr.as_ptr()) };
+        if limit == u32::MAX { None } else { Some(limit) }
     }
 
-    /// Set the maximum number of in-progress matches for this cursor.  The
-    /// limit must be > 0 and <= 65536.
+    /// Set the maximum number of in-progress matches for this cursor.
+    ///
+    /// Set to `None` to remove the limit and allow unlimited in-progress matches (the default).
     #[doc(alias = "ts_query_cursor_set_match_limit")]
-    pub fn set_match_limit(&mut self, limit: u32) {
+    pub fn set_match_limit(&mut self, limit: Option<u32>) {
         unsafe {
-            ffi::ts_query_cursor_set_match_limit(self.ptr.as_ptr(), limit);
+            ffi::ts_query_cursor_set_match_limit(self.ptr.as_ptr(), limit.unwrap_or(u32::MAX));
         }
     }
 
