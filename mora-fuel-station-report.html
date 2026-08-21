@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير معاينة موقع وتقدير تكلفة تطوير — شركة مور للوقود</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* MORA palette — royal navy + orange + white */
+  --navy:#0B2A5E;         /* Royal navy (primary brand) */
+  --navy-2:#143C7A;       /* Navy mid */
+  --navy-3:#1E5099;       /* Navy highlight */
+  --gold:#F58220;         /* MORA orange (accent) */
+  --gold-2:#FF9E4D;       /* Bright orange */
+  --cream:#F5F7FB;        /* Cool light gray-white */
+  --paper:#ffffff;
+  --line:#e4e7ee;
+  --line-strong:#c9cfda;
+  --text:#111827;
+  --muted:#6b7280;
+  --red:#c5384a;
+  --orange:#d97706;
+  --blue:#2563eb;
+  --green:#059669;
+  --shadow:0 1px 3px rgba(11,42,94,.06),0 6px 18px rgba(11,42,94,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Cairo',system-ui,-apple-system,sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  font-size:14px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+input,select,textarea,button{font-family:inherit;font-size:inherit;color:inherit}
+input,select,textarea{
+  border:1px solid var(--line);
+  background:var(--paper);
+  padding:6px 10px;
+  border-radius:4px;
+  width:100%;
+  transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(212,169,76,.15);
+}
+input[type=number]{text-align:center}
+
+/* ── Top bar ───────────────────────────── */
+.topbar{
+  background:var(--navy);
+  color:#fff;
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  width:40px;height:40px;border-radius:8px;
+  background:linear-gradient(135deg,#FFA85C 0%,var(--gold) 55%,#D8681A 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#fff;font-size:19px;letter-spacing:-.5px;
+  box-shadow:0 2px 6px rgba(245,130,32,.35),inset 0 1px 0 rgba(255,255,255,.35);
+}
+.brand-txt{display:flex;flex-direction:column;line-height:1.2}
+.brand-txt b{font-weight:700;font-size:15px}
+.brand-txt span{font-size:11px;opacity:.75;font-weight:400}
+.actions{display:flex;gap:8px}
+.btn{
+  background:transparent;border:1px solid rgba(255,255,255,.25);
+  color:#fff;padding:7px 14px;border-radius:5px;cursor:pointer;
+  font-weight:500;font-size:12.5px;transition:all .15s;
+}
+.btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.4)}
+.btn-gold{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:600}
+.btn-gold:hover{background:var(--gold-2);border-color:var(--gold-2)}
+.btn-ghost-red{border-color:rgba(255,120,120,.4);color:#ffb8b8}
+.btn-ghost-red:hover{background:rgba(255,80,80,.15);border-color:rgba(255,120,120,.6)}
+
+/* ── Page ─────────────────────────────── */
+.page{max-width:1180px;margin:0 auto;padding:24px}
+.doc-head{
+  background:var(--paper);border-radius:10px;padding:22px 26px;margin-bottom:20px;
+  border-top:4px solid var(--gold);box-shadow:var(--shadow);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;
+}
+.doc-title{font-size:20px;font-weight:800;color:var(--navy);line-height:1.35}
+.doc-sub{font-size:12.5px;color:var(--muted);margin-top:4px}
+.doc-meta{font-size:12px;color:var(--muted);text-align:left}
+.doc-meta .k{font-weight:600;color:var(--navy)}
+
+/* ── Cards ────────────────────────────── */
+.card{
+  background:var(--paper);border-radius:10px;overflow:hidden;
+  box-shadow:var(--shadow);margin-bottom:18px;
+}
+.card-head{
+  background:var(--navy);color:#fff;padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.card-head h2{font-size:15px;font-weight:700;letter-spacing:.2px;display:flex;align-items:center;gap:10px}
+.card-head h2 .num{
+  width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--navy);
+  display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;
+}
+.card-head .sum{font-size:13.5px;font-weight:600;color:var(--gold-2)}
+.card-body{padding:16px 20px}
+
+/* ── Station data grid ─────────────────── */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:600;color:var(--navy)}
+.field .hint{font-size:10.5px;color:var(--muted);font-weight:400}
+
+/* ── Totals hero ──────────────────────── */
+.hero{
+  background:linear-gradient(135deg,#071E42 0%,var(--navy) 45%,var(--navy-2) 100%);
+  color:#fff;border-radius:10px;padding:24px 28px;margin-bottom:20px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden;
+  border:1px solid rgba(245,130,32,.15);
+}
+.hero::before{
+  content:"";position:absolute;top:-60px;left:-60px;width:240px;height:240px;
+  background:radial-gradient(circle,rgba(245,130,32,.28) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero::after{
+  content:"";position:absolute;bottom:-80px;right:-40px;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(245,130,32,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative}
+.hero-label{font-size:13px;opacity:.75;font-weight:500;letter-spacing:.3px}
+.hero-total{font-size:44px;font-weight:800;color:var(--gold);line-height:1;margin-top:6px;letter-spacing:-1px}
+.hero-total small{font-size:16px;font-weight:500;color:#fff;opacity:.8;margin-inline-start:8px}
+.hero-stats{display:flex;gap:22px;font-size:12.5px;opacity:.85}
+.hero-stats b{display:block;font-size:20px;font-weight:700;color:var(--gold-2);margin-bottom:2px}
+.section-totals{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px;position:relative;
+}
+.st-cell{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;padding:10px 12px;
+}
+.st-cell .n{font-size:10.5px;opacity:.7;font-weight:500;margin-bottom:2px}
+.st-cell .v{font-size:15px;font-weight:700;color:var(--gold-2)}
+.st-cell .c{font-size:10px;opacity:.55;margin-top:1px}
+
+/* ── Items table ──────────────────────── */
+.tbl-wrap{margin:0 -20px;overflow-x:auto}
+table.items{width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px}
+table.items thead th{
+  background:var(--cream);color:var(--navy);font-weight:700;font-size:11.5px;
+  padding:10px 8px;text-align:center;border-bottom:2px solid var(--line-strong);
+  position:sticky;top:0;
+}
+table.items thead th:first-child{padding-inline-start:20px}
+table.items thead th:last-child{padding-inline-end:20px}
+table.items tbody td{
+  padding:6px 8px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle;
+}
+table.items tbody td:first-child{padding-inline-start:20px}
+table.items tbody td:last-child{padding-inline-end:20px}
+table.items tbody tr:hover{background:#f7f9fd}
+table.items input,table.items select{padding:5px 6px;font-size:12px;border-radius:3px}
+table.items input.desc{text-align:right;min-width:180px}
+.item-name{text-align:right;font-weight:500;color:var(--text);min-width:200px;padding:8px 10px !important}
+.item-name small{display:block;color:var(--muted);font-weight:400;font-size:10.5px;margin-top:2px}
+.reg{
+  display:inline-block;background:#ecf0f8;color:var(--navy);padding:2px 7px;border-radius:3px;
+  font-size:10.5px;font-weight:600;font-family:'Cairo',monospace;white-space:nowrap;
+}
+.reg.empty{opacity:.35}
+.pill{
+  display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;
+  white-space:nowrap;
+}
+.pill-fori{background:#fdecee;color:var(--red)}
+.pill-tahil{background:#fef3e2;color:var(--orange)}
+.pill-wuqud{background:#e6efff;color:var(--blue)}
+.total-cell{font-weight:700;color:var(--navy);font-size:13px;min-width:80px}
+.item-num{color:var(--muted);font-weight:600;font-size:11px;width:32px}
+.remove-item{
+  background:transparent;border:none;color:var(--muted);cursor:pointer;padding:4px 6px;
+  border-radius:3px;font-size:14px;transition:all .15s;
+}
+.remove-item:hover{background:#fdecee;color:var(--red)}
+
+/* ── Section footer ───────────────────── */
+.sec-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:var(--cream);border-top:1px solid var(--line);
+}
+.sec-foot .subtotal{font-size:15px;font-weight:700;color:var(--navy)}
+.sec-foot .subtotal span{color:var(--gold);font-size:18px;margin-inline-start:8px}
+.add-btn{
+  background:transparent;border:1px dashed var(--navy-3);color:var(--navy);
+  padding:6px 14px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600;
+  transition:all .15s;
+}
+.add-btn:hover{background:var(--navy);color:#fff;border-style:solid}
+
+/* ── Notes ────────────────────────────── */
+.note{
+  border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:10px;
+  background:#f9fafd;
+}
+.note-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.note-head input{max-width:340px;font-weight:600}
+.note textarea{min-height:60px;resize:vertical}
+.note-cost{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.no-notes{text-align:center;color:var(--muted);padding:20px;font-size:13px;font-style:italic}
+
+/* ── Signatures ───────────────────────── */
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.sig-block{background:#f9fafd;border:1px solid var(--line);border-radius:6px;padding:14px}
+.sig-block h4{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--gold)}
+.sig-block .field{margin-bottom:8px}
+.sig-line{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line-strong);font-size:12px;color:var(--muted)}
+
+/* ── Footer note ──────────────────────── */
+.legend{
+  background:var(--paper);border-radius:10px;padding:16px 22px;margin-bottom:20px;
+  box-shadow:var(--shadow);font-size:12px;color:var(--muted);
+  display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+}
+.legend b{color:var(--navy);font-weight:700}
+.legend .pill{margin-inline-start:4px}
+.save-status{
+  font-size:12px;color:var(--green);font-weight:600;
+}
+.save-status.saving{color:var(--orange)}
+
+/* ── Responsive ───────────────────────── */
+@media (max-width:840px){
+  .grid{grid-template-columns:1fr 1fr}
+  .section-totals{grid-template-columns:repeat(2,1fr)}
+  .sig-grid{grid-template-columns:1fr}
+  .hero-total{font-size:34px}
+  .doc-head{flex-direction:column}
+  .page{padding:14px}
+  .topbar{padding:12px 16px;flex-wrap:wrap;gap:10px}
+  .actions{width:100%;justify-content:stretch}
+  .actions .btn{flex:1;text-align:center;font-size:11.5px;padding:7px 8px}
+}
+@media (max-width:560px){
+  .grid{grid-template-columns:1fr}
+}
+
+/* ── Print ────────────────────────────── */
+@media print{
+  body{background:#fff;font-size:11px}
+  .topbar,.actions,.add-btn,.remove-item,.legend{display:none !important}
+  .page{padding:0;max-width:100%}
+  .card,.hero,.doc-head{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+  .tbl-wrap{overflow:visible}
+  table.items{min-width:0;font-size:9.5px}
+  table.items thead th{position:static;background:#ecf0f8}
+  .card-head{background:#0B2A5E !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hero{background:#0B2A5E !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  input,select,textarea{border:none;background:transparent;padding:2px}
+  .pill,.reg{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4;margin:12mm}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">م</div>
+    <div class="brand-txt">
+      <b>شركة مور للوقود</b>
+      <span>MORA FUEL COMPANY</span>
+    </div>
+  </div>
+  <div class="actions">
+    <span class="save-status" id="saveStatus">✓ محفوظ</span>
+    <button class="btn" onclick="exportJSON()">تصدير JSON</button>
+    <button class="btn btn-ghost-red" onclick="resetAll()">تفريغ</button>
+    <button class="btn btn-gold" onclick="window.print()">طباعة / PDF</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="doc-head">
+    <div>
+      <div class="doc-title">تقرير معاينة موقع وتقدير تكلفة تطوير محطة</div>
+      <div class="doc-sub">تحديد تكاليف متطلبات التطوير والتعديل وفق لائحة محطات الوقود — محطات الأفراد</div>
+    </div>
+    <div class="doc-meta">
+      <div><span class="k">تاريخ الطباعة:</span> <span id="printDate"></span></div>
+      <div><span class="k">رقم مرجعي:</span> <input type="text" data-field="ref" placeholder="MORA-..." style="max-width:140px;display:inline-block;font-size:11.5px"></div>
+    </div>
+  </div>
+
+  <!-- Station data -->
+  <div class="card">
+    <div class="card-head"><h2><span class="num">1</span>بيانات المحطة والمعاينة</h2></div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field"><label>اسم المحطة</label><input type="text" data-field="stName" placeholder="محطة مورا ..."></div>
+        <div class="field"><label>فئة المحطة</label>
+          <select data-field="stClass">
+            <option value="">اختر الفئة</option>
+            <option value="أ">فئة أ</option>
+            <option value="ب">فئة ب</option>
+          </select>
+        </div>
+        <div class="field"><label>المدينة - الحي</label><input type="text" data-field="stCity" placeholder="مثال: الرس - القصيم"></div>
+        <div class="field"><label>تاريخ الزيارة</label><input type="date" data-field="stDate"></div>
+        <div class="field"><label>اسم المشرف</label><input type="text" data-field="supName"></div>
+        <div class="field"><label>رقم تواصل المشرف</label><input type="tel" data-field="supPhone" placeholder="05..."></div>
+        <div class="field"><label>مالك / مشغل المحطة</label><input type="text" data-field="ownName"></div>
+        <div class="field"><label>رقم تواصل المالك</label><input type="tel" data-field="ownPhone" placeholder="05..."></div>
+        <div class="field"><label>عدد الخزانات / نوع الوقود</label><input type="text" data-field="tanks" placeholder="مثال: 3 خزانات — 91، 95، ديزل"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero totals -->
+  <div class="hero">
+    <div class="hero-row">
+      <div>
+        <div class="hero-label">الإجمالي التقديري لتكلفة التطوير</div>
+        <div class="hero-total"><span id="grandTotal">0</span><small>ريال سعودي</small></div>
+      </div>
+      <div class="hero-stats">
+        <div><b id="itemCount">0</b>عدد البنود</div>
+        <div><b id="notesCount">0</b>ملاحظات إضافية</div>
+        <div><b id="mismatchCount">0</b>بنود غير مطابقة</div>
+      </div>
+    </div>
+    <div class="section-totals" id="sectionTotals"></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <b>دليل المهل:</b>
+    <span><span class="pill pill-fori">فوري</span> قبل التشغيل</span>
+    <span><span class="pill pill-tahil">تأهيل</span> ضمن تجديد التأهيل</span>
+    <span><span class="pill pill-wuqud">وقود</span> ضمن رخصة الوقود</span>
+    <b style="margin-inline-start:auto">الحفظ:</b>
+    <span>يتم حفظ التقرير تلقائياً في متصفحك — لا تحتاج ضغط أي زر.</span>
+  </div>
+
+  <!-- Sections container -->
+  <div id="sections"></div>
+
+  <!-- Additional notes -->
+  <div class="card">
+    <div class="card-head">
+      <h2><span class="num">6</span>ملاحظات الموقع وصور — خارج بنود اللائحة</h2>
+      <span class="sum" id="notesTotal">0 ريال</span>
+    </div>
+    <div class="card-body">
+      <div id="notesList"><div class="no-notes">لا توجد ملاحظات مسجلة بعد.</div></div>
+    </div>
+    <div class="sec-foot">
+      <div class="subtotal">إجمالي التقديرات المبدئية <span id="notesTotal2">0</span> ريال</div>
+      <button class="add-btn" onclick="addNote()">＋ إضافة ملاحظة</button>
+    </div>
+  </div>
+
+  <!-- Signatures -->
+  <div class="card">
+    <div class="card-head"><h2><span class="num">7</span>الاعتماد والتوقيعات</h2></div>
+    <div class="card-body">
+      <div class="sig-grid">
+        <div class="sig-block">
+          <h4>أعدَّه</h4>
+          <div class="field"><label>الاسم والوظيفة</label><input type="text" data-field="prepName"></div>
+          <div class="field"><label>التاريخ</label><input type="date" data-field="prepDate"></div>
+          <div class="sig-line">التوقيع: ....................................................</div>
+        </div>
+        <div class="sig-block">
+          <h4>اعتمده</h4>
+          <div class="field"><label>الاسم والوظيفة</label><input type="text" data-field="apprName"></div>
+          <div class="field"><label>التاريخ</label><input type="date" data-field="apprDate"></div>
+          <div class="sig-line">التوقيع: ....................................................</div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px">
+        <label>ملاحظات ختامية</label>
+        <textarea data-field="closingNotes" rows="3" placeholder="ملاحظات إضافية على التقرير أو تعليمات للتنفيذ..."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  Regulation items — from MORA fuel-station regulation (اللائحة)
+// ═══════════════════════════════════════════════════════════════
+const SECTIONS = [
+  {
+    id:"site", num:2, title:"الموقع العام",
+    items:[
+      {n:"التشجير", reg:"5.6.4", d:"tahil"},
+      {n:"لوحات إرشادية كاملة للموقع العام", reg:"5.5.3", d:"fori"},
+      {n:"تجهيزات الوصول الشامل", reg:"4.1.4", d:"fori"},
+      {n:"توفر دورات مياه للموظفين", reg:"4.11.1 ز", d:"fori"},
+      {n:"دهان البردورات", reg:"4.11.3 ت", d:"fori"},
+      {n:"إضاءة المظلة بأنوار LED", reg:"", d:"fori"},
+      {n:"أرضية مظلة الوقود (أنترلوك)", reg:"4.1.1.3 ب", d:"fori"},
+      {n:"أبعاد وارتفاع وتدعيم مظلة الوقود", reg:"4.1.2 ط", d:"fori"},
+      {n:"رصيف مظلة الوقود", reg:"4.2.1 ز", d:"fori"},
+      {n:"منطقة وقوف شاحنة الوقود", reg:"5.2.1 د", d:"tahil"},
+      {n:"أعمال الأنترلوك وتخطيط الأرضيات", reg:"4.1.1.2 د", d:"fori"},
+      {n:"إضاءة ساحات المحطة", reg:"", d:"fori"},
+      {n:"أعمال مدنية خاصة بالهوية", reg:"", d:"fori"},
+      {n:"دورات مياه للرجال والنساء والمعاقين", reg:"4.11.1 أ", d:"fori"},
+      {n:"أجهزة هواء وماء مجانية", reg:"جدول 3-3 2.1", d:"fori"},
+      {n:"أعمال التشطيبات العامة", reg:"", d:"fori"},
+      {n:"لوحة توزيع الكهرباء", reg:"4.3.1 ب", d:"fori"},
+      {n:"تحقيق المسجد لمتطلبات اللائحة (فئة أ)", reg:"4.10.1", d:"fori"},
+      {n:"ارتدادات المباني وطول ضلع الواجهة", reg:"جدول 1-3 3.2", d:"fori"},
+      {n:"إنشاء كافي شوب", reg:"4.5.1", d:"fori"},
+      {n:"غرفة تحكم داخل المحطة", reg:"جدول 3-3 2.1", d:"fori"},
+    ]
+  },
+  {
+    id:"safety", num:3, title:"البيئة والسلامة",
+    items:[
+      {n:"توفر نظام إنذار في المسجد (فئة أ)", reg:"", d:"fori"},
+      {n:"مفتاح الفصل للطوارئ", reg:"4.6.1 ي", d:"fori"},
+      {n:"لوحات إرشادية باللغتين لمظلة الوقود", reg:"4.7.1 ز", d:"fori"},
+      {n:"طفايات الحريق", reg:"", d:"fori"},
+      {n:"نظام إنذار الحريق", reg:"", d:"fori"},
+      {n:"مصيدة زيوت (Oil Trap)", reg:"", d:"fori"},
+    ]
+  },
+  {
+    id:"fuel", num:4, title:"نظام الوقود",
+    items:[
+      {n:"نوعية التمديدات", reg:"4.5.1 ل", d:"fori"},
+      {n:"نوعية موزعات الوقود", reg:"", d:"fori"},
+      {n:"فتحة في الخزان لاستعادة البخار (مانهولات)", reg:"4.5.1 ض", d:"wuqud"},
+      {n:"محبس قبل كل موزع", reg:"4.5.1 ظ", d:"wuqud"},
+      {n:"محبس عند التوصيل في الخزان", reg:"4.5.1 ظ", d:"wuqud"},
+      {n:"توفر الديزل في مظلة السيارات", reg:"4.6.1 ه", d:"wuqud"},
+      {n:"توفر موزعات ثلاثية المنتجات", reg:"4.6.1 و", d:"wuqud"},
+      {n:"جهاز كشف التسربات للأنابيب", reg:"4.5.1 ر", d:"wuqud"},
+      {n:"جهاز كشف التسربات للخزانات", reg:"", d:"wuqud"},
+      {n:"صمام آلي لغلق المضخات", reg:"4.6.1 ن", d:"tahil"},
+      {n:"توصيلات التفريغ (سبل كونتينر أو ما يعادله)", reg:"4.5.1 خ", d:"tahil"},
+      {n:"تمديدات الوقود (بولي إيثيلين طبقتين)", reg:"4.5.1 ل", d:"wuqud"},
+      {n:"عدد موزعات الوقود (فئة أ)", reg:"4.6.1 د", d:"wuqud"},
+      {n:"الخزان في غرفة خرسانية أو مدفون", reg:"4.6.1 هـ", d:"fori"},
+      {n:"وعاء انسكاب (SUMP) تحت الموزعات", reg:"4.6.1 ف", d:"wuqud"},
+      {n:"ماسورة الهوايات", reg:"4.5.1 ز", d:"fori"},
+      {n:"مطابقة الخزانات حسب اللائحة", reg:"", d:"fori"},
+    ]
+  },
+  {
+    id:"brand", num:5, title:"هوية الشركة",
+    items:[
+      {n:"لوحة الأسعار", reg:"4.1.3", d:"fori"},
+      {n:"لوحة الدخول والخروج", reg:"4.1.3", d:"fori"},
+      {n:"هوية مظلة الوقود (كلادينج)", reg:"4.1.3", d:"fori"},
+      {n:"هوية واجهة المباني", reg:"4.1.3", d:"fori"},
+    ]
+  },
+  {
+    id:"it", num:6, title:"تقنية المعلومات",
+    items:[
+      {n:"توفر نظام أوتميشن للخزانات", reg:"4.12.1 ج", d:"tahil"},
+      {n:"توفر نظام أوتميشن للموزعات", reg:"4.12.1 أ", d:"tahil"},
+      {n:"توفر نظام مركزي للكاميرات جاهز للربط", reg:"4.8.1", d:"fori"},
+    ]
+  },
+];
+
+const DEADLINES = {
+  fori:{label:"فوري",cls:"pill-fori"},
+  tahil:{label:"تأهيل",cls:"pill-tahil"},
+  wuqud:{label:"وقود",cls:"pill-wuqud"}
+};
+
+const STATUS_OPTIONS = ["مطابق","غير مطابق","غير متوفر","تحت المتابعة","غير مطلوب"];
+
+const STORAGE_KEY = "mora_report_v1";
+
+// ═══════════════════════════════════════════════════════════════
+//  Rendering
+// ═══════════════════════════════════════════════════════════════
+function buildSections(){
+  const container = document.getElementById("sections");
+  container.innerHTML = SECTIONS.map((s,si) => `
+    <div class="card" data-section="${s.id}">
+      <div class="card-head">
+        <h2><span class="num">${s.num}</span>${s.title}</h2>
+        <span class="sum" data-sub-label>0 ريال</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap">
+          <table class="items">
+            <thead>
+              <tr>
+                <th style="width:32px">#</th>
+                <th style="text-align:right;padding-inline-start:12px">وصف البند</th>
+                <th>رقم اللائحة</th>
+                <th>المهلة</th>
+                <th>الحالة</th>
+                <th>تكلفة الوحدة</th>
+                <th>العدد</th>
+                <th>الإجمالي</th>
+                <th style="text-align:right;min-width:180px">وصف العمل المطلوب</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody data-items>
+              ${s.items.map((it,i)=>renderRow(s.id,i,it,true)).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="sec-foot">
+        <div class="subtotal">إجمالي القسم <span data-sub>0</span> ريال</div>
+        <button class="add-btn" onclick="addCustomItem('${s.id}')">＋ إضافة بند مخصص</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderRow(secId,idx,it,builtin){
+  const d = DEADLINES[it.d] || {label:"-",cls:""};
+  return `
+    <tr data-row>
+      <td class="item-num">${idx+1}</td>
+      <td class="item-name">
+        ${builtin ? it.n : `<input type="text" value="${escapeHtml(it.n)}" placeholder="اسم البند" data-cell="name" style="font-weight:500">`}
+        ${builtin ? "" : `<small>بند مخصص</small>`}
+      </td>
+      <td>${it.reg ? `<span class="reg">${it.reg}</span>` : `<span class="reg empty">—</span>`}</td>
+      <td>${d.label ? `<span class="pill ${d.cls}">${d.label}</span>` : `<span class="pill">—</span>`}</td>
+      <td>
+        <select data-cell="status">
+          <option value=""></option>
+          ${STATUS_OPTIONS.map(o=>`<option value="${o}">${o}</option>`).join("")}
+        </select>
+      </td>
+      <td><input type="number" min="0" step="1" data-cell="unit" placeholder="0"></td>
+      <td><input type="number" min="0" step="1" value="1" data-cell="qty"></td>
+      <td class="total-cell" data-cell="total">0</td>
+      <td><input type="text" class="desc" data-cell="desc" placeholder="—"></td>
+      <td>${builtin ? "" : `<button class="remove-item" onclick="removeRow(this)" title="حذف">✕</button>`}</td>
+    </tr>
+  `;
+}
+
+function escapeHtml(s){return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function addCustomItem(secId){
+  const card = document.querySelector(`[data-section="${secId}"]`);
+  const tbody = card.querySelector("[data-items]");
+  const idx = tbody.querySelectorAll("[data-row]").length;
+  const it = {n:"", reg:"", d:""};
+  tbody.insertAdjacentHTML("beforeend", renderRow(secId, idx, it, false));
+  reindex(tbody);
+  attachRowListeners(tbody.lastElementChild);
+  recalc();save();
+}
+
+function removeRow(btn){
+  const row = btn.closest("[data-row]");
+  const tbody = row.parentElement;
+  row.remove();
+  reindex(tbody);
+  recalc();save();
+}
+
+function reindex(tbody){
+  [...tbody.querySelectorAll("[data-row]")].forEach((r,i)=>{
+    r.querySelector(".item-num").textContent = i+1;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Calculation
+// ═══════════════════════════════════════════════════════════════
+function recalc(){
+  let grand=0, itemCount=0, mismatch=0;
+  const secTotalsEl = document.getElementById("sectionTotals");
+  const secTotals = [];
+
+  document.querySelectorAll("[data-section]").forEach(card=>{
+    let sub=0;
+    const rows = card.querySelectorAll("[data-row]");
+    rows.forEach(r=>{
+      const unit = parseFloat(r.querySelector('[data-cell=unit]').value)||0;
+      const qty = parseFloat(r.querySelector('[data-cell=qty]').value)||0;
+      const total = unit*qty;
+      r.querySelector('[data-cell=total]').textContent = fmt(total);
+      sub += total;
+      if (unit>0 || qty>1) itemCount++;
+      const st = r.querySelector('[data-cell=status]').value;
+      if (st==="غير مطابق") mismatch++;
+    });
+    card.querySelector("[data-sub]").textContent = fmt(sub);
+    card.querySelector("[data-sub-label]").textContent = fmt(sub) + " ريال";
+    grand += sub;
+    const secId = card.dataset.section;
+    const secDef = SECTIONS.find(s=>s.id===secId);
+    secTotals.push({title:secDef.title, count:rows.length, total:sub});
+  });
+
+  // Notes total
+  let notesSum=0, noteCount=0;
+  document.querySelectorAll("[data-note]").forEach(n=>{
+    const u = parseFloat(n.querySelector('[data-note-unit]').value)||0;
+    const q = parseFloat(n.querySelector('[data-note-qty]').value)||0;
+    const t = u*q;
+    n.querySelector('[data-note-total]').textContent = fmt(t) + " ريال";
+    notesSum += t;
+    noteCount++;
+  });
+  grand += notesSum;
+  document.getElementById("notesTotal").textContent = fmt(notesSum)+" ريال";
+  document.getElementById("notesTotal2").textContent = fmt(notesSum);
+
+  document.getElementById("grandTotal").textContent = fmt(grand);
+  document.getElementById("itemCount").textContent = itemCount;
+  document.getElementById("notesCount").textContent = noteCount;
+  document.getElementById("mismatchCount").textContent = mismatch;
+
+  secTotalsEl.innerHTML = secTotals.map(s=>`
+    <div class="st-cell">
+      <div class="n">${s.title}</div>
+      <div class="v">${fmt(s.total)}</div>
+      <div class="c">${s.count} بند</div>
+    </div>
+  `).join("");
+}
+
+function fmt(n){return (Math.round(n)||0).toLocaleString("en-US")}
+
+// ═══════════════════════════════════════════════════════════════
+//  Notes
+// ═══════════════════════════════════════════════════════════════
+function addNote(prefill){
+  const list = document.getElementById("notesList");
+  const empty = list.querySelector(".no-notes");
+  if (empty) empty.remove();
+  const wrap = document.createElement("div");
+  wrap.className = "note";
+  wrap.setAttribute("data-note","");
+  wrap.innerHTML = `
+    <div class="note-head">
+      <input type="text" placeholder="عنوان الملاحظة" data-note-title>
+      <button class="remove-item" onclick="removeNote(this)" title="حذف">✕ حذف</button>
+    </div>
+    <textarea placeholder="وصف الملاحظة والمعالجة المقترحة..." data-note-body></textarea>
+    <div class="note-cost">
+      <input type="number" placeholder="تكلفة الوحدة" data-note-unit min="0">
+      <input type="number" placeholder="العدد" data-note-qty min="0" value="1">
+      <div style="display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy)"><span data-note-total>0 ريال</span></div>
+    </div>
+  `;
+  list.appendChild(wrap);
+  if (prefill){
+    wrap.querySelector('[data-note-title]').value = prefill.title||"";
+    wrap.querySelector('[data-note-body]').value = prefill.body||"";
+    wrap.querySelector('[data-note-unit]').value = prefill.unit||"";
+    wrap.querySelector('[data-note-qty]').value = prefill.qty||1;
+  }
+  wrap.querySelectorAll("input,textarea").forEach(el=>{
+    el.addEventListener("input",()=>{recalc();save()});
+  });
+  recalc();save();
+}
+function removeNote(btn){
+  const note = btn.closest("[data-note]");
+  note.remove();
+  const list = document.getElementById("notesList");
+  if (!list.querySelector("[data-note]")){
+    list.innerHTML = `<div class="no-notes">لا توجد ملاحظات مسجلة بعد.</div>`;
+  }
+  recalc();save();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Persistence
+// ═══════════════════════════════════════════════════════════════
+let saveTimer;
+function save(){
+  clearTimeout(saveTimer);
+  const el = document.getElementById("saveStatus");
+  el.className = "save-status saving";
+  el.textContent = "⋯ يحفظ";
+  saveTimer = setTimeout(()=>{
+    try{
+      const data = collectData();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      el.className = "save-status";
+      el.textContent = "✓ محفوظ";
+    }catch(e){
+      el.textContent = "⚠ لم يُحفظ";
+    }
+  },400);
+}
+
+function collectData(){
+  const data = {fields:{}, sections:{}, notes:[]};
+  document.querySelectorAll("[data-field]").forEach(el=>{
+    data.fields[el.dataset.field] = el.value;
+  });
+  document.querySelectorAll("[data-section]").forEach(card=>{
+    const secId = card.dataset.section;
+    data.sections[secId] = [];
+    card.querySelectorAll("[data-row]").forEach(r=>{
+      const nameInput = r.querySelector('[data-cell=name]');
+      data.sections[secId].push({
+        custom: !!nameInput,
+        name: nameInput ? nameInput.value : "",
+        status: r.querySelector('[data-cell=status]').value,
+        unit: r.querySelector('[data-cell=unit]').value,
+        qty: r.querySelector('[data-cell=qty]').value,
+        desc: r.querySelector('[data-cell=desc]').value,
+      });
+    });
+  });
+  document.querySelectorAll("[data-note]").forEach(n=>{
+    data.notes.push({
+      title: n.querySelector('[data-note-title]').value,
+      body: n.querySelector('[data-note-body]').value,
+      unit: n.querySelector('[data-note-unit]').value,
+      qty: n.querySelector('[data-note-qty]').value,
+    });
+  });
+  return data;
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data.fields||{}).forEach(([k,v])=>{
+      const el = document.querySelector(`[data-field="${k}"]`);
+      if (el) el.value = v;
+    });
+    Object.entries(data.sections||{}).forEach(([secId,rows])=>{
+      const card = document.querySelector(`[data-section="${secId}"]`);
+      if (!card) return;
+      const tbody = card.querySelector("[data-items]");
+      const existing = tbody.querySelectorAll("[data-row]");
+      rows.forEach((row,i)=>{
+        if (row.custom){
+          const secDef = SECTIONS.find(s=>s.id===secId);
+          tbody.insertAdjacentHTML("beforeend", renderRow(secId, i, {n:row.name,reg:"",d:""}, false));
+          const el = tbody.lastElementChild;
+          fillRow(el,row);
+          attachRowListeners(el);
+        } else if (existing[i]){
+          fillRow(existing[i], row);
+        }
+      });
+      reindex(tbody);
+    });
+    (data.notes||[]).forEach(n=>addNote(n));
+  }catch(e){console.error(e)}
+}
+
+function fillRow(row,data){
+  if (row.querySelector('[data-cell=name]') && data.name) row.querySelector('[data-cell=name]').value = data.name;
+  if (data.status) row.querySelector('[data-cell=status]').value = data.status;
+  if (data.unit) row.querySelector('[data-cell=unit]').value = data.unit;
+  if (data.qty) row.querySelector('[data-cell=qty]').value = data.qty;
+  if (data.desc) row.querySelector('[data-cell=desc]').value = data.desc;
+}
+
+function attachRowListeners(row){
+  row.querySelectorAll("input,select").forEach(el=>{
+    el.addEventListener("input",()=>{recalc();save()});
+    el.addEventListener("change",()=>{recalc();save()});
+  });
+}
+
+function attachAllListeners(){
+  document.querySelectorAll("[data-row] input,[data-row] select").forEach(el=>{
+    el.addEventListener("input",()=>{recalc();save()});
+    el.addEventListener("change",()=>{recalc();save()});
+  });
+  document.querySelectorAll("[data-field]").forEach(el=>{
+    el.addEventListener("input",()=>save());
+    el.addEventListener("change",()=>save());
+  });
+}
+
+function resetAll(){
+  if (!confirm("سيتم مسح جميع البيانات المحفوظة. متابعة؟")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+function exportJSON(){
+  const data = collectData();
+  const stName = data.fields.stName || "تقرير";
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${stName}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Init
+// ═══════════════════════════════════════════════════════════════
+document.getElementById("printDate").textContent = new Date().toLocaleDateString("ar-SA-u-nu-latn",{year:"numeric",month:"long",day:"numeric"});
+buildSections();
+load();
+attachAllListeners();
+recalc();
+</script>
+</body>
+</html>
